@@ -79,7 +79,6 @@ public class FriendsPanel extends JPanel {
             BorderFactory.createMatteBorder(0, 0, 1, 0, PathColors.DIVIDER),
             BorderFactory.createEmptyBorder(16, 16, 16, 16)
         ));
-        section.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
         JLabel searchLabel = new JLabel("Add Friend");
         searchLabel.setFont(PathFonts.SMALL_BOLD);
@@ -211,7 +210,7 @@ public class FriendsPanel extends JPanel {
 
         if (showAction) {
             if (isFriend) {
-                JLabel friendLabel = new JLabel("Friend ✓");
+                JLabel friendLabel = new JLabel("Friend");
                 friendLabel.setFont(PathFonts.SMALL);
                 friendLabel.setForeground(PathColors.SUCCESS);
                 row.add(friendLabel, BorderLayout.EAST);
@@ -279,6 +278,8 @@ public class FriendsPanel extends JPanel {
                     friendsContainer.add(row);
                 }
             }
+            // Add bottom padding to prevent last item from being cut off
+            friendsContainer.add(Box.createVerticalStrut(80));
         }
 
         friendsContainer.revalidate();
