@@ -12,7 +12,7 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Profile panel with logout button.
+ * Profile panel with horizontal layout: avatar left, info right.
  */
 public class ProfilePanel extends JPanel {
     private final MainFrame mainFrame;
@@ -46,7 +46,6 @@ public class ProfilePanel extends JPanel {
         header.setBackground(PathColors.PRIMARY);
         header.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
 
-        // Same header as all screens - just "Path" logo
         JLabel logoLabel = new JLabel("Path");
         logoLabel.setFont(new Font("Georgia", Font.ITALIC | Font.BOLD, 24));
         logoLabel.setForeground(Color.WHITE);
@@ -62,20 +61,16 @@ public class ProfilePanel extends JPanel {
         User user = DataStore.getInstance().getCurrentUser();
         if (user == null) return;
 
-        // Profile card
-        JPanel profileCard = new JPanel(new GridBagLayout());
+        // Profile card - horizontal layout
+        JPanel profileCard = new JPanel(new BorderLayout(20, 0));
         profileCard.setBackground(PathColors.BACKGROUND_WHITE);
         profileCard.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(0, 0, 1, 0, PathColors.DIVIDER),
-            BorderFactory.createEmptyBorder(30, 30, 30, 30)
+            BorderFactory.createEmptyBorder(24, 24, 24, 24)
         ));
-        profileCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
+        profileCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
 
-        JPanel centerContent = new JPanel();
-        centerContent.setOpaque(false);
-        centerContent.setLayout(new BoxLayout(centerContent, BoxLayout.Y_AXIS));
-
-        // Avatar
+        // Left: Avatar
         JPanel avatar = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -99,39 +94,43 @@ public class ProfilePanel extends JPanel {
         };
         avatar.setOpaque(false);
         avatar.setPreferredSize(new Dimension(80, 80));
-        avatar.setMaximumSize(new Dimension(80, 80));
-        avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerContent.add(avatar);
+        profileCard.add(avatar, BorderLayout.WEST);
 
-        centerContent.add(Box.createVerticalStrut(16));
+        // Right: Info (name, username, friends count)
+        JPanel infoPanel = new JPanel();
+        infoPanel.setOpaque(false);
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
 
         JLabel nameLabel = new JLabel(user.getDisplayName());
         nameLabel.setFont(PathFonts.TITLE);
         nameLabel.setForeground(PathColors.TEXT_PRIMARY);
-        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerContent.add(nameLabel);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        infoPanel.add(nameLabel);
+
+        infoPanel.add(Box.createVerticalStrut(4));
 
         JLabel usernameLabel = new JLabel("@" + user.getUsername());
         usernameLabel.setFont(PathFonts.BODY);
         usernameLabel.setForeground(PathColors.TEXT_MUTED);
-        usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerContent.add(usernameLabel);
+        usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        infoPanel.add(usernameLabel);
 
-        centerContent.add(Box.createVerticalStrut(12));
+        infoPanel.add(Box.createVerticalStrut(8));
 
         JLabel friendsLabel = new JLabel(user.getFriendCount() + " of " + User.MAX_FRIENDS + " friends");
         friendsLabel.setFont(PathFonts.SMALL);
         friendsLabel.setForeground(PathColors.PRIMARY);
-        friendsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerContent.add(friendsLabel);
+        friendsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        infoPanel.add(friendsLabel);
 
-        profileCard.add(centerContent);
+        profileCard.add(infoPanel, BorderLayout.CENTER);
         contentPanel.add(profileCard);
 
         // Logout button section
-        JPanel logoutSection = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
+        JPanel logoutSection = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 16));
         logoutSection.setBackground(PathColors.BACKGROUND);
-        logoutSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        logoutSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
 
         JButton logoutBtn = new JButton("Logout") {
             @Override
@@ -158,7 +157,7 @@ public class ProfilePanel extends JPanel {
                 g2.dispose();
             }
         };
-        logoutBtn.setPreferredSize(new Dimension(200, 44));
+        logoutBtn.setPreferredSize(new Dimension(100, 38));
         logoutBtn.setContentAreaFilled(false);
         logoutBtn.setBorderPainted(false);
         logoutBtn.setFocusPainted(false);
@@ -171,7 +170,7 @@ public class ProfilePanel extends JPanel {
         contentPanel.add(logoutSection);
 
         // Moments section
-        JPanel sectionHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 12));
+        JPanel sectionHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 12));
         sectionHeader.setBackground(PathColors.BACKGROUND);
         sectionHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         
@@ -198,6 +197,9 @@ public class ProfilePanel extends JPanel {
                 contentPanel.add(card);
             }
         }
+
+        // Bottom padding
+        contentPanel.add(Box.createVerticalStrut(80));
 
         contentPanel.revalidate();
         contentPanel.repaint();
