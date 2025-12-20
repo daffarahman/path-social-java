@@ -7,15 +7,21 @@ import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
 import madebydap.pathsocial.ui.style.PathIcons;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
- * Dialog for adding a new moment with custom icons.
+ * Dialog for adding a new moment with image support for PHOTO type.
  */
 public class AddMomentDialog extends JDialog {
     private final MomentType momentType;
     private JTextArea contentArea;
+    private JLabel imagePreview;
+    private String selectedImagePath;
     private boolean confirmed = false;
 
     public AddMomentDialog(JFrame parent, MomentType momentType) {
@@ -23,7 +29,7 @@ public class AddMomentDialog extends JDialog {
         this.momentType = momentType;
 
         setTitle("New " + momentType.getDisplayName());
-        setSize(360, 280);
+        setSize(380, momentType == MomentType.PHOTO ? 420 : 280);
         setLocationRelativeTo(parent);
         setResizable(false);
 
@@ -50,17 +56,46 @@ public class AddMomentDialog extends JDialog {
 
         main.add(header, BorderLayout.NORTH);
 
-        // Content input
-        JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.setOpaque(false);
+        // Content panel
+        JPanel contentPanel = new JPanel();
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-        JLabel promptLabel = new JLabel(momentType.getPrefix() + "...");
+        // Image picker for PHOTO type
+        if (momentType == MomentType.PHOTO) {
+            JPanel imagePanel = new JPanel(new BorderLayout());
+            imagePanel.setOpaque(false);
+            imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
+            imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            imagePreview = new JLabel("Click to select image", SwingConstants.CENTER);
+            imagePreview.setFont(PathFonts.BODY);
+            imagePreview.setForeground(PathColors.TEXT_MUTED);
+            imagePreview.setPreferredSize(new Dimension(340, 150));
+            imagePreview.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(PathColors.BORDER, 2, true),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+            ));
+            imagePreview.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            imagePreview.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    selectImage();
+                }
+            });
+            imagePanel.add(imagePreview, BorderLayout.CENTER);
+            contentPanel.add(imagePanel);
+        }
+
+        // Caption/content input
+        JLabel promptLabel = new JLabel(momentType == MomentType.PHOTO ? "Caption (optional):" : momentType.getPrefix() + "...");
         promptLabel.setFont(PathFonts.SMALL);
         promptLabel.setForeground(PathColors.TEXT_MUTED);
         promptLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
-        inputPanel.add(promptLabel, BorderLayout.NORTH);
+        promptLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(promptLabel);
 
-        contentArea = new JTextArea(5, 25);
+        contentArea = new JTextArea(momentType == MomentType.PHOTO ? 2 : 5, 25);
         contentArea.setFont(PathFonts.BODY);
         contentArea.setForeground(PathColors.TEXT_PRIMARY);
         contentArea.setBackground(PathColors.BACKGROUND);
@@ -70,9 +105,10 @@ public class AddMomentDialog extends JDialog {
 
         JScrollPane scrollPane = new JScrollPane(contentArea);
         scrollPane.setBorder(BorderFactory.createLineBorder(PathColors.BORDER));
-        inputPanel.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(scrollPane);
 
-        main.add(inputPanel, BorderLayout.CENTER);
+        main.add(contentPanel, BorderLayout.CENTER);
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -90,6 +126,36 @@ public class AddMomentDialog extends JDialog {
         main.add(buttonPanel, BorderLayout.SOUTH);
 
         setContentPane(main);
+    }
+
+    private void selectImage() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Image");
+        chooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "jpeg", "png", "gif", "bmp"));
+        
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            selectedImagePath = file.getAbsolutePath();
+            
+            // Show preview
+            try {
+                BufferedImage img = ImageIO.read(file);
+                if (img != null) {
+                    // Scale to fit preview
+                    int maxWidth = 320;
+                    int maxHeight = 140;
+                    double scale = Math.min((double) maxWidth / img.getWidth(), (double) maxHeight / img.getHeight());
+                    int newWidth = (int) (img.getWidth() * scale);
+                    int newHeight = (int) (img.getHeight() * scale);
+                    
+                    Image scaled = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+                    imagePreview.setIcon(new ImageIcon(scaled));
+                    imagePreview.setText("");
+                }
+            } catch (Exception ex) {
+                imagePreview.setText("Error loading image");
+            }
+        }
     }
 
     private JButton createButton(String text, Color bgColor, Color fgColor) {
@@ -131,13 +197,25 @@ public class AddMomentDialog extends JDialog {
 
     private void shareMoment() {
         String content = contentArea.getText().trim();
-        if (content.isEmpty()) {
-            contentArea.requestFocus();
-            return;
+        
+        // For PHOTO, image is required but caption is optional
+        if (momentType == MomentType.PHOTO) {
+            if (selectedImagePath == null || selectedImagePath.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please select an image", "Image Required", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (content.isEmpty()) {
+                content = "Shared a photo";
+            }
+        } else {
+            if (content.isEmpty()) {
+                contentArea.requestFocus();
+                return;
+            }
         }
 
         DataStore dataStore = DataStore.getInstance();
-        Moment moment = new Moment(dataStore.getCurrentUser().getId(), momentType, content);
+        Moment moment = new Moment(dataStore.getCurrentUser().getId(), momentType, content, selectedImagePath);
         dataStore.addMoment(moment);
 
         confirmed = true;

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Represents a moment shared by a user on Path.
- * A moment captures a specific action or thought at a point in time.
+ * Supports optional image attachment for PHOTO moments.
  */
 public class Moment {
     private final String id;
@@ -14,6 +14,7 @@ public class Moment {
     private final MomentType type;
     private final String content;
     private final LocalDateTime timestamp;
+    private String imagePath; // For PHOTO moments
 
     public Moment(String userId, MomentType type, String content) {
         this.id = UUID.randomUUID().toString();
@@ -21,6 +22,12 @@ public class Moment {
         this.type = type;
         this.content = content;
         this.timestamp = LocalDateTime.now();
+        this.imagePath = null;
+    }
+
+    public Moment(String userId, MomentType type, String content, String imagePath) {
+        this(userId, type, content);
+        this.imagePath = imagePath;
     }
 
     public String getId() {
@@ -41,6 +48,18 @@ public class Moment {
 
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public boolean hasImage() {
+        return imagePath != null && !imagePath.isEmpty();
     }
 
     public String getFormattedTime() {

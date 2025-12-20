@@ -2,26 +2,40 @@ package madebydap.pathsocial.ui.components;
 
 import madebydap.pathsocial.data.DataStore;
 import madebydap.pathsocial.model.Moment;
+import madebydap.pathsocial.model.MomentType;
 import madebydap.pathsocial.model.User;
 import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
 import madebydap.pathsocial.ui.style.PathIcons;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
- * Moment card with timeline line and single icon in avatar.
+ * Moment card with timeline line, custom icons, and image support.
  */
 public class MomentCard extends JPanel {
     private final Moment moment;
     private final User author;
     private boolean isFirst = false;
     private boolean isLast = false;
+    private BufferedImage momentImage;
 
     public MomentCard(Moment moment) {
         this.moment = moment;
         this.author = DataStore.getInstance().getUserById(moment.getUserId());
+        
+        // Load image if exists
+        if (moment.hasImage()) {
+            try {
+                momentImage = ImageIO.read(new File(moment.getImagePath()));
+            } catch (Exception e) {
+                momentImage = null;
+            }
+        }
         
         setBackground(PathColors.CARD);
         setLayout(new BorderLayout(0, 0));
@@ -129,6 +143,52 @@ public class MomentCard extends JPanel {
         
         panel.add(actionContentPanel);
 
+        // Image for PHOTO moments
+        if (moment.getType() == MomentType.PHOTO && momentImage != null) {
+            panel.add(Box.createVerticalStrut(8));
+            
+            JPanel imagePanel = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+                    int maxWidth = getWidth();
+                    int maxHeight = 200;
+                    
+                    double scale = Math.min((double) maxWidth / momentImage.getWidth(), 
+                                           (double) maxHeight / momentImage.getHeight());
+                    int imgWidth = (int) (momentImage.getWidth() * scale);
+                    int imgHeight = (int) (momentImage.getHeight() * scale);
+
+                    // Draw rounded rectangle clip
+                    g2.setClip(new java.awt.geom.RoundRectangle2D.Float(0, 0, imgWidth, imgHeight, 12, 12));
+                    g2.drawImage(momentImage, 0, 0, imgWidth, imgHeight, null);
+
+                    g2.dispose();
+                }
+
+                @Override
+                public Dimension getPreferredSize() {
+                    if (momentImage != null) {
+                        int maxWidth = 250;
+                        int maxHeight = 200;
+                        double scale = Math.min((double) maxWidth / momentImage.getWidth(), 
+                                               (double) maxHeight / momentImage.getHeight());
+                        return new Dimension((int)(momentImage.getWidth() * scale), 
+                                           (int)(momentImage.getHeight() * scale));
+                    }
+                    return new Dimension(200, 150);
+                }
+            };
+            imagePanel.setOpaque(false);
+            imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            imagePanel.setMaximumSize(new Dimension(250, 200));
+            panel.add(imagePanel);
+        }
+
         return panel;
     }
 
@@ -151,7 +211,11 @@ public class MomentCard extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        return new Dimension(d.width, Math.max(d.height, 80));
+        int minHeight = 80;
+        if (moment.getType() == MomentType.PHOTO && momentImage != null) {
+            minHeight = 280; // More space for image
+        }
+        return new Dimension(d.width, Math.max(d.height, minHeight));
     }
 
     @Override
