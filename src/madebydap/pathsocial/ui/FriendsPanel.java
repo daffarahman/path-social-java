@@ -10,7 +10,7 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Friends panel - clean list design with add functionality.
+ * Friends panel with same header as all screens.
  */
 public class FriendsPanel extends JPanel {
     private final MainFrame mainFrame;
@@ -32,10 +32,8 @@ public class FriendsPanel extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBackground(PathColors.BACKGROUND);
 
-        // Search section
         content.add(createSearchSection());
 
-        // Friends list
         JPanel sectionHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 12));
         sectionHeader.setBackground(PathColors.BACKGROUND);
         sectionHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
@@ -60,38 +58,15 @@ public class FriendsPanel extends JPanel {
 
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(PathColors.BACKGROUND_WHITE);
-        header.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, PathColors.DIVIDER),
-            BorderFactory.createEmptyBorder(12, 16, 12, 16)
-        ));
+        header.setBackground(PathColors.PRIMARY);
+        header.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
 
-        JLabel backLabel = new JLabel("← Back");
-        backLabel.setFont(PathFonts.BODY);
-        backLabel.setForeground(PathColors.PRIMARY);
-        backLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        backLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                mainFrame.showPanel("timeline");
-            }
-        });
-        header.add(backLabel, BorderLayout.WEST);
-
-        JLabel titleLabel = new JLabel("Friends");
-        titleLabel.setFont(PathFonts.BODY_BOLD);
-        titleLabel.setForeground(PathColors.TEXT_PRIMARY);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        header.add(titleLabel, BorderLayout.CENTER);
-
-        User currentUser = DataStore.getInstance().getCurrentUser();
-        String countText = currentUser != null
-                ? currentUser.getFriendCount() + "/" + User.MAX_FRIENDS
-                : "0/" + User.MAX_FRIENDS;
-        JLabel countLabel = new JLabel(countText);
-        countLabel.setFont(PathFonts.SMALL);
-        countLabel.setForeground(PathColors.TEXT_MUTED);
-        header.add(countLabel, BorderLayout.EAST);
+        // Same header as all screens - just "Path" logo
+        JLabel logoLabel = new JLabel("Path");
+        logoLabel.setFont(new Font("Georgia", Font.ITALIC | Font.BOLD, 24));
+        logoLabel.setForeground(Color.WHITE);
+        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        header.add(logoLabel, BorderLayout.CENTER);
 
         return header;
     }
@@ -113,7 +88,6 @@ public class FriendsPanel extends JPanel {
         section.add(searchLabel);
         section.add(Box.createVerticalStrut(10));
 
-        // Search field
         JPanel searchPanel = new JPanel(new BorderLayout(8, 0));
         searchPanel.setOpaque(false);
         searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
@@ -198,7 +172,6 @@ public class FriendsPanel extends JPanel {
         row.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
-        // Avatar
         JPanel avatar = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -220,7 +193,6 @@ public class FriendsPanel extends JPanel {
         avatar.setPreferredSize(new Dimension(32, 32));
         row.add(avatar, BorderLayout.WEST);
 
-        // Name
         JPanel namePanel = new JPanel();
         namePanel.setOpaque(false);
         namePanel.setLayout(new BoxLayout(namePanel, BoxLayout.Y_AXIS));
@@ -237,7 +209,6 @@ public class FriendsPanel extends JPanel {
 
         row.add(namePanel, BorderLayout.CENTER);
 
-        // Action
         if (showAction) {
             if (isFriend) {
                 JLabel friendLabel = new JLabel("Friend ✓");
@@ -260,9 +231,12 @@ public class FriendsPanel extends JPanel {
                                 JOptionPane.INFORMATION_MESSAGE);
                             return;
                         }
-                        currentUser.addFriend(user.getId());
-                        refresh();
-                        performSearch();
+                        
+                        boolean success = DataStore.getInstance().addFriend(currentUser.getId(), user.getId());
+                        if (success) {
+                            refresh();
+                            performSearch();
+                        }
                     }
                 });
                 row.add(addLabel, BorderLayout.EAST);

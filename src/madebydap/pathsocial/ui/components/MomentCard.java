@@ -5,12 +5,13 @@ import madebydap.pathsocial.model.Moment;
 import madebydap.pathsocial.model.User;
 import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
+import madebydap.pathsocial.ui.style.PathIcons;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Moment card with timeline line connecting through avatars.
+ * Moment card with timeline line and single icon in avatar.
  */
 public class MomentCard extends JPanel {
     private final Moment moment;
@@ -44,7 +45,7 @@ public class MomentCard extends JPanel {
         content.setOpaque(false);
         content.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
 
-        // Left: Timeline line + Avatar
+        // Left: Timeline line + Avatar with icon
         content.add(createTimelineAvatar(), BorderLayout.WEST);
 
         // Center: Content
@@ -67,34 +68,26 @@ public class MomentCard extends JPanel {
                 int centerX = 20;
                 int avatarY = 16;
                 int avatarSize = 40;
-                int avatarCenterY = avatarY + avatarSize / 2;
 
                 // Draw timeline line
                 g2.setColor(PathColors.BORDER);
                 g2.setStroke(new BasicStroke(2));
 
-                // Line from top to avatar (if not first)
                 if (!isFirst) {
                     g2.drawLine(centerX, 0, centerX, avatarY);
                 }
 
-                // Line from avatar to bottom (if not last)
                 if (!isLast) {
                     g2.drawLine(centerX, avatarY + avatarSize, centerX, getHeight());
                 }
 
-                // Draw avatar circle (on top of line)
+                // Draw avatar circle
                 g2.setColor(PathColors.getMomentTypeColor(moment.getType()));
                 g2.fillOval(centerX - avatarSize / 2, avatarY, avatarSize, avatarSize);
 
-                // Draw initials
-                g2.setColor(Color.WHITE);
-                g2.setFont(PathFonts.BODY_BOLD);
-                String initials = author != null ? author.getInitials() : "?";
-                FontMetrics fm = g2.getFontMetrics();
-                int textX = centerX - fm.stringWidth(initials) / 2;
-                int textY = avatarCenterY + fm.getAscent() / 2 - 2;
-                g2.drawString(initials, textX, textY);
+                // Draw icon in center of avatar
+                Icon icon = PathIcons.getMomentIcon(moment.getType(), 20, Color.WHITE);
+                icon.paintIcon(this, g2, centerX - 10, avatarY + 10);
 
                 g2.dispose();
             }
@@ -117,24 +110,24 @@ public class MomentCard extends JPanel {
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(nameLabel);
 
-        panel.add(Box.createVerticalStrut(2));
+        panel.add(Box.createVerticalStrut(4));
 
-        // Action text
-        String actionText = moment.getType().getIcon() + " " + moment.getType().getPrefix();
-        JLabel actionLabel = new JLabel(actionText);
-        actionLabel.setFont(PathFonts.SMALL);
-        actionLabel.setForeground(PathColors.TEXT_MUTED);
-        actionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(actionLabel);
-
-        panel.add(Box.createVerticalStrut(6));
-
-        // Content
-        JLabel contentLabel = new JLabel("<html><body style='width: 180px'>" + moment.getContent() + "</body></html>");
+        // Action + Content in one line with different colors
+        JPanel actionContentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        actionContentPanel.setOpaque(false);
+        actionContentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel prefixLabel = new JLabel(moment.getType().getPrefix() + " ");
+        prefixLabel.setFont(PathFonts.BODY);
+        prefixLabel.setForeground(PathColors.TEXT_MUTED);
+        actionContentPanel.add(prefixLabel);
+        
+        JLabel contentLabel = new JLabel(moment.getContent());
         contentLabel.setFont(PathFonts.BODY);
-        contentLabel.setForeground(PathColors.TEXT_SECONDARY);
-        contentLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(contentLabel);
+        contentLabel.setForeground(PathColors.TEXT_PRIMARY);
+        actionContentPanel.add(contentLabel);
+        
+        panel.add(actionContentPanel);
 
         return panel;
     }
@@ -158,7 +151,7 @@ public class MomentCard extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        return new Dimension(d.width, Math.max(d.height, 90));
+        return new Dimension(d.width, Math.max(d.height, 80));
     }
 
     @Override

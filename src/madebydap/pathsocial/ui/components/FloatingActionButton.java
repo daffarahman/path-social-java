@@ -2,15 +2,17 @@ package madebydap.pathsocial.ui.components;
 
 import madebydap.pathsocial.model.MomentType;
 import madebydap.pathsocial.ui.style.PathColors;
-import madebydap.pathsocial.ui.style.PathFonts;
+import madebydap.pathsocial.ui.style.PathIcons;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
- * Path's signature red floating action button.
+ * Path's signature red floating action button with custom icons.
+ * Only shows user-creatable moment types (excludes FRIENDSHIP).
  */
 public class FloatingActionButton extends JButton {
     private Consumer<MomentType> onMomentTypeSelected;
@@ -36,6 +38,12 @@ public class FloatingActionButton extends JButton {
 
     public void setOnMomentTypeSelected(Consumer<MomentType> listener) {
         this.onMomentTypeSelected = listener;
+    }
+
+    private MomentType[] getCreatableTypes() {
+        return Arrays.stream(MomentType.values())
+                .filter(MomentType::isUserCreatable)
+                .toArray(MomentType[]::new);
     }
 
     private void toggleExpanded() {
@@ -125,7 +133,7 @@ public class FloatingActionButton extends JButton {
         if (animationProgress < 0.8f) return null;
 
         Point center = new Point(POPUP_SIZE / 2, POPUP_SIZE / 2);
-        MomentType[] types = MomentType.values();
+        MomentType[] types = getCreatableTypes();
         int count = types.length;
         double angleStep = 2 * Math.PI / count;
         double startAngle = -Math.PI / 2;
@@ -151,12 +159,12 @@ public class FloatingActionButton extends JButton {
         // Light overlay
         if (animationProgress > 0) {
             int size = (int)(EXPAND_RADIUS * 2.5f * animationProgress);
-            g2.setColor(new Color(255, 255, 255, (int)(220 * animationProgress)));
+            g2.setColor(new Color(255, 255, 255, (int)(230 * animationProgress)));
             g2.fillOval(center.x - size/2, center.y - size/2, size, size);
         }
 
-        // Mini buttons
-        MomentType[] types = MomentType.values();
+        // Mini buttons with icons (only user-creatable types)
+        MomentType[] types = getCreatableTypes();
         int count = types.length;
         double angleStep = 2 * Math.PI / count;
         double startAngle = -Math.PI / 2;
@@ -180,11 +188,8 @@ public class FloatingActionButton extends JButton {
                     MINI_BUTTON_SIZE, MINI_BUTTON_SIZE);
 
             // Icon
-            g2.setColor(Color.WHITE);
-            g2.setFont(PathFonts.ICON);
-            FontMetrics fm = g2.getFontMetrics();
-            String icon = type.getIcon();
-            g2.drawString(icon, x - fm.stringWidth(icon) / 2, y + fm.getAscent() / 2 - 2);
+            Icon icon = PathIcons.getMomentIcon(type, 18, Color.WHITE);
+            icon.paintIcon(null, g2, x - 9, y - 9);
         }
 
         // Center button

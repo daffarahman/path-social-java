@@ -1,5 +1,6 @@
 package madebydap.pathsocial;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import madebydap.pathsocial.ui.MainFrame;
 
 import javax.swing.*;
@@ -10,18 +11,21 @@ import javax.swing.*;
  * Features:
  * - Share moments (Awake, Asleep, Music, Photo, Location, Thought)
  * - Friend limit of 50 (Dunbar's Number)
- * - Premium dark theme UI
+ * - Clean light theme UI with FlatLaf
  * - Iconic floating action button
  * 
  * @author madebydap
  */
 public class App {
     public static void main(String[] args) {
-        // Set system look and feel properties
+        // Set FlatLaf Look and Feel
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            FlatLightLaf.setup();
+            UIManager.put("Button.arc", 8);
+            UIManager.put("Component.arc", 8);
+            UIManager.put("TextComponent.arc", 8);
         } catch (Exception e) {
-            // Fallback to default
+            System.err.println("Failed to initialize FlatLaf");
         }
 
         // Launch the application

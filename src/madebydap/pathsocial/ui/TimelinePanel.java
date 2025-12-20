@@ -2,8 +2,6 @@ package madebydap.pathsocial.ui;
 
 import madebydap.pathsocial.data.DataStore;
 import madebydap.pathsocial.model.Moment;
-import madebydap.pathsocial.model.MomentType;
-import madebydap.pathsocial.ui.components.FloatingActionButton;
 import madebydap.pathsocial.ui.components.MomentCard;
 import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
@@ -11,14 +9,21 @@ import madebydap.pathsocial.ui.style.PathFonts;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Timeline panel with connected moments.
+ * Timeline panel with auto-refresh and clean Path-style red header.
  */
 public class TimelinePanel extends JPanel {
     private final MainFrame mainFrame;
     private JPanel momentsContainer;
     private JScrollPane scrollPane;
+    private ScheduledExecutorService refreshService;
+    private int momentCount = 0;
+
+    private static final int REFRESH_INTERVAL_SECONDS = 15;
 
     public TimelinePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -28,14 +33,8 @@ public class TimelinePanel extends JPanel {
     }
 
     private void initComponents() {
-        // Header
         add(createHeader(), BorderLayout.NORTH);
 
-        // Content area with FAB
-        JPanel contentArea = new JPanel(new BorderLayout());
-        contentArea.setBackground(PathColors.BACKGROUND);
-
-        // Timeline content
         momentsContainer = new JPanel();
         momentsContainer.setLayout(new BoxLayout(momentsContainer, BoxLayout.Y_AXIS));
         momentsContainer.setBackground(PathColors.CARD);
@@ -47,85 +46,68 @@ public class TimelinePanel extends JPanel {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        contentArea.add(scrollPane, BorderLayout.CENTER);
-
-        // FAB panel
-        JPanel fabPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 20));
-        fabPanel.setOpaque(false);
-        
-        FloatingActionButton fab = new FloatingActionButton();
-        fab.setOnMomentTypeSelected(this::showAddMomentDialog);
-        fabPanel.add(fab);
-        
-        contentArea.add(fabPanel, BorderLayout.SOUTH);
-
-        add(contentArea, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(PathColors.BACKGROUND_WHITE);
-        header.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, PathColors.DIVIDER),
-            BorderFactory.createEmptyBorder(12, 16, 12, 16)
-        ));
+        header.setBackground(PathColors.PRIMARY);
+        header.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
 
-        // Left: Logo
-        JLabel logoLabel = new JLabel("path");
-        logoLabel.setFont(new Font("Georgia", Font.ITALIC, 24));
-        logoLabel.setForeground(PathColors.PRIMARY);
-        header.add(logoLabel, BorderLayout.WEST);
-
-        // Right: Navigation
-        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 0));
-        navPanel.setOpaque(false);
-
-        navPanel.add(createNavLink("Profile", () -> mainFrame.showPanel("profile")));
-        navPanel.add(createNavLink("Friends", () -> mainFrame.showPanel("friends")));
-        navPanel.add(createNavLink("Logout", () -> {
-            DataStore.getInstance().logout();
-            mainFrame.showPanel("login");
-        }));
-
-        header.add(navPanel, BorderLayout.EAST);
+        // Center: Path logo only
+        JLabel logoLabel = new JLabel("Path");
+        logoLabel.setFont(new Font("Georgia", Font.ITALIC | Font.BOLD, 24));
+        logoLabel.setForeground(Color.WHITE);
+        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        header.add(logoLabel, BorderLayout.CENTER);
 
         return header;
     }
 
-    private JLabel createNavLink(String text, Runnable action) {
-        JLabel label = new JLabel(text);
-        label.setFont(PathFonts.SMALL);
-        label.setForeground(PathColors.TEXT_SECONDARY);
-        label.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        label.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                action.run();
-            }
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                label.setForeground(PathColors.PRIMARY);
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                label.setForeground(PathColors.TEXT_SECONDARY);
-            }
+    public void startAutoRefresh() {
+        if (refreshService != null && !refreshService.isShutdown()) {
+            return;
+        }
+
+        refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "Timeline-AutoRefresh");
+            t.setDaemon(true);
+            return t;
         });
-        return label;
+
+        refreshService.scheduleAtFixedRate(() -> {
+            if (!isShowing() || DataStore.getInstance().getCurrentUser() == null) {
+                return;
+            }
+
+            List<Moment> moments = DataStore.getInstance().getTimelineMoments();
+            int newCount = moments.size();
+
+            if (newCount != momentCount) {
+                SwingUtilities.invokeLater(this::refreshContent);
+            }
+        }, REFRESH_INTERVAL_SECONDS, REFRESH_INTERVAL_SECONDS, TimeUnit.SECONDS);
+
+        System.out.println("[AutoRefresh] Started - checking every " + REFRESH_INTERVAL_SECONDS + "s");
     }
 
-    private void showAddMomentDialog(MomentType type) {
-        AddMomentDialog dialog = new AddMomentDialog(mainFrame, type);
-        dialog.setVisible(true);
-        if (dialog.isConfirmed()) {
-            refresh();
+    public void stopAutoRefresh() {
+        if (refreshService != null && !refreshService.isShutdown()) {
+            refreshService.shutdown();
+            System.out.println("[AutoRefresh] Stopped");
         }
     }
 
     public void refresh() {
+        refreshContent();
+        startAutoRefresh();
+    }
+
+    private void refreshContent() {
         momentsContainer.removeAll();
 
         List<Moment> moments = DataStore.getInstance().getTimelineMoments();
+        momentCount = moments.size();
 
         if (moments.isEmpty()) {
             JPanel emptyPanel = new JPanel(new GridBagLayout());
@@ -157,7 +139,6 @@ public class TimelinePanel extends JPanel {
                 Moment moment = moments.get(i);
                 MomentCard card = new MomentCard(moment);
                 
-                // Set first/last flags for timeline line
                 card.setFirstInTimeline(i == 0);
                 card.setLastInTimeline(i == moments.size() - 1);
                 
@@ -167,7 +148,5 @@ public class TimelinePanel extends JPanel {
 
         momentsContainer.revalidate();
         momentsContainer.repaint();
-
-        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
 }

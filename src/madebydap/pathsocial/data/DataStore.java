@@ -8,19 +8,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Singleton data store for the application.
- * Stores users and moments in memory.
+ * In-memory data store for Path clone.
+ * Manages users, moments, and authentication.
  */
 public class DataStore {
     private static DataStore instance;
-
-    private final Map<String, User> users;
-    private final List<Moment> moments;
+    
+    private final Map<String, User> users = new HashMap<>();
+    private final List<Moment> moments = new ArrayList<>();
     private User currentUser;
 
     private DataStore() {
-        this.users = new HashMap<>();
-        this.moments = new ArrayList<>();
         initializeSampleData();
     }
 
@@ -38,43 +36,30 @@ public class DataStore {
         users.put(alice.getId(), alice);
 
         User bob = new User("bob", "password", "Bob Smith");
-        bob.setBio("Coffee enthusiast ☕");
+        bob.setBio("Coffee enthusiast & developer");
         users.put(bob.getId(), bob);
 
         User charlie = new User("charlie", "password", "Charlie Brown");
-        charlie.setBio("Music lover 🎵");
+        charlie.setBio("Music lover");
         users.put(charlie.getId(), charlie);
 
-        // Make them friends
+        // Make them friends (mutual)
         alice.addFriend(bob.getId());
-        alice.addFriend(charlie.getId());
         bob.addFriend(alice.getId());
+        alice.addFriend(charlie.getId());
         charlie.addFriend(alice.getId());
 
-        // Create sample moments
-        moments.add(new Moment(alice.getId(), MomentType.AWAKE, "Good morning everyone!"));
+        // Add sample moments
+        moments.add(new Moment(alice.getId(), MomentType.AWAKE, "Ready for a productive day!"));
         moments.add(new Moment(bob.getId(), MomentType.MUSIC, "Bohemian Rhapsody - Queen"));
         moments.add(new Moment(charlie.getId(), MomentType.LOCATION, "Central Park, NYC"));
-        moments.add(new Moment(alice.getId(), MomentType.THOUGHT, "What a beautiful day!"));
-        moments.add(new Moment(bob.getId(), MomentType.PHOTO, "Sunset at the beach"));
+        moments.add(new Moment(alice.getId(), MomentType.THOUGHT, "The weather is beautiful today"));
     }
 
-    // User operations
-    public User registerUser(String username, String password, String displayName) {
-        // Check if username exists
-        for (User user : users.values()) {
-            if (user.getUsername().equalsIgnoreCase(username)) {
-                return null;
-            }
-        }
-        User newUser = new User(username, password, displayName);
-        users.put(newUser.getId(), newUser);
-        return newUser;
-    }
-
+    // Authentication
     public User login(String username, String password) {
         for (User user : users.values()) {
-            if (user.getUsername().equalsIgnoreCase(username) && user.checkPassword(password)) {
+            if (user.authenticate(username, password)) {
                 currentUser = user;
                 return user;
             }
@@ -90,45 +75,68 @@ public class DataStore {
         return currentUser;
     }
 
-    public User getUserById(String id) {
-        return users.get(id);
-    }
-
-    public User getUserByUsername(String username) {
+    public User registerUser(String username, String password, String displayName) {
+        // Check if username exists
         for (User user : users.values()) {
             if (user.getUsername().equalsIgnoreCase(username)) {
-                return user;
+                return null;
             }
         }
-        return null;
+
+        User newUser = new User(username, password, displayName);
+        users.put(newUser.getId(), newUser);
+        return newUser;
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+    // User queries
+    public User getUserById(String id) {
+        return users.get(id);
     }
 
     public List<User> searchUsers(String query) {
         String lowerQuery = query.toLowerCase();
         return users.values().stream()
+                .filter(u -> !u.getId().equals(currentUser.getId()))
                 .filter(u -> u.getUsername().toLowerCase().contains(lowerQuery) ||
-                        u.getDisplayName().toLowerCase().contains(lowerQuery))
-                .filter(u -> !u.getId().equals(currentUser != null ? currentUser.getId() : ""))
+                           u.getDisplayName().toLowerCase().contains(lowerQuery))
                 .collect(Collectors.toList());
     }
 
-    // Moment operations
+    // Friendship with mutual logic
+    public boolean addFriend(String userId, String friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        
+        if (user == null || friend == null) return false;
+        if (user.isFriend(friendId)) return false;
+        if (!user.canAddFriend() || !friend.canAddFriend()) return false;
+        
+        // Add mutual friendship
+        user.addFriend(friendId);
+        friend.addFriend(userId);
+        
+        // Create friendship moment
+        String content = friend.getDisplayName();
+        Moment friendshipMoment = new Moment(userId, MomentType.FRIENDSHIP, content);
+        moments.add(0, friendshipMoment);
+        
+        return true;
+    }
+
+    // Moments
     public void addMoment(Moment moment) {
         moments.add(0, moment);
     }
 
     public List<Moment> getTimelineMoments() {
-        if (currentUser == null) return new ArrayList<>();
+        if (currentUser == null) return Collections.emptyList();
 
-        List<String> visibleUserIds = new ArrayList<>(currentUser.getFriendIds());
-        visibleUserIds.add(currentUser.getId());
+        Set<String> visibleUsers = new HashSet<>();
+        visibleUsers.add(currentUser.getId());
+        visibleUsers.addAll(currentUser.getFriendIds());
 
         return moments.stream()
-                .filter(m -> visibleUserIds.contains(m.getUserId()))
+                .filter(m -> visibleUsers.contains(m.getUserId()))
                 .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
                 .collect(Collectors.toList());
     }

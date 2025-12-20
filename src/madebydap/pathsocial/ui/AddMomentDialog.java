@@ -5,12 +5,13 @@ import madebydap.pathsocial.model.Moment;
 import madebydap.pathsocial.model.MomentType;
 import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
+import madebydap.pathsocial.ui.style.PathIcons;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Dialog for adding a new moment - minimal design.
+ * Dialog for adding a new moment with custom icons.
  */
 public class AddMomentDialog extends JDialog {
     private final MomentType momentType;
@@ -24,7 +25,6 @@ public class AddMomentDialog extends JDialog {
         setTitle("New " + momentType.getDisplayName());
         setSize(360, 280);
         setLocationRelativeTo(parent);
-        setUndecorated(false);
         setResizable(false);
 
         initComponents();
@@ -35,15 +35,18 @@ public class AddMomentDialog extends JDialog {
         main.setBackground(PathColors.BACKGROUND_WHITE);
         main.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Header
-        JPanel header = new JPanel(new BorderLayout());
+        // Header with icon
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         header.setOpaque(false);
         header.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
 
-        JLabel typeLabel = new JLabel(momentType.getIcon() + " " + momentType.getDisplayName());
+        JLabel iconLabel = new JLabel(PathIcons.getMomentIcon(momentType, 24, PathColors.getMomentTypeColor(momentType)));
+        header.add(iconLabel);
+
+        JLabel typeLabel = new JLabel(momentType.getDisplayName());
         typeLabel.setFont(PathFonts.SUBTITLE);
         typeLabel.setForeground(PathColors.getMomentTypeColor(momentType));
-        header.add(typeLabel, BorderLayout.WEST);
+        header.add(typeLabel);
 
         main.add(header, BorderLayout.NORTH);
 

@@ -39,6 +39,10 @@ public class User {
         return this.password.equals(password);
     }
 
+    public boolean authenticate(String username, String password) {
+        return this.username.equalsIgnoreCase(username) && this.password.equals(password);
+    }
+
     public String getDisplayName() {
         return displayName;
     }

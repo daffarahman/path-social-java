@@ -38,6 +38,7 @@ public class PathColors {
     public static final Color PHOTO_COLOR = new Color(66, 165, 245);
     public static final Color LOCATION_COLOR = new Color(102, 187, 106);
     public static final Color THOUGHT_COLOR = new Color(38, 198, 218);
+    public static final Color FRIENDSHIP_COLOR = new Color(171, 71, 188);
 
     private PathColors() {}
 
@@ -49,6 +50,7 @@ public class PathColors {
             case PHOTO: return PHOTO_COLOR;
             case LOCATION: return LOCATION_COLOR;
             case THOUGHT: return THOUGHT_COLOR;
+            case FRIENDSHIP: return FRIENDSHIP_COLOR;
             default: return PRIMARY;
         }
     }
