@@ -186,17 +186,34 @@ public class PathIcons {
             g2.setColor(color);
             g2.translate(x, y);
 
-            int margin = size / 5;
+            // Draw map pin shape - teardrop/balloon style
+            int pinWidth = (int)(size * 0.7);
+            int pinHeight = (int)(size * 0.85);
+            int startX = (size - pinWidth) / 2;
+            int startY = size / 10;
+            
+            // Main pin body - rounded top with pointed bottom
             Path2D pin = new Path2D.Float();
-            pin.moveTo(size/2, size - margin);
-            pin.lineTo(margin, size/3);
-            pin.curveTo(margin, margin, size - margin, margin, size - margin, size/3);
+            int radius = pinWidth / 2;
+            int centerX = size / 2;
+            int bottomY = startY + pinHeight;
+            
+            // Start from bottom point
+            pin.moveTo(centerX, bottomY);
+            // Left curve up to top
+            pin.quadTo(startX - radius/3, startY + radius, startX, startY + radius);
+            // Top arc (semicircle)
+            pin.curveTo(startX, startY, centerX, startY, centerX, startY);
+            pin.curveTo(centerX, startY, startX + pinWidth, startY, startX + pinWidth, startY + radius);
+            // Right curve down to bottom point
+            pin.quadTo(startX + pinWidth + radius/3, startY + radius, centerX, bottomY);
             pin.closePath();
             g2.fill(pin);
             
-            int dotSize = size / 5;
+            // Inner circle (white dot)
             g2.setColor(Color.WHITE);
-            g2.fillOval(size/2 - dotSize/2, size/4, dotSize, dotSize);
+            int dotSize = pinWidth / 2;
+            g2.fillOval(centerX - dotSize/2, startY + radius/2, dotSize, dotSize);
 
             g2.dispose();
         }
