@@ -48,7 +48,7 @@ Path Social supports seven types of moments:
 ## Project Structure
 
 ```
-Responsi02_PPBO_L0124062/
+/path-social # repository root
 ├── src/
 │   └── madebydap/
 │       └── pathsocial/
@@ -78,11 +78,10 @@ Responsi02_PPBO_L0124062/
 │                   └── PathIcons.java   # Icon rendering
 ├── lib/
 │   └── flatlaf-3.4.jar                  # FlatLaf Look and Feel library
-├── bin/                                 # Compiled class files
 ├── docs/                                # Generated Javadoc
 ├── runner.bat                           # Windows build and run script
-├── generate-javadoc.bat                 # Javadoc generation script
-└── DOKUMENTASI.md                       # Detailed code documentation (Indonesian)
+└── generate-javadoc.bat                 # Javadoc generation script
+
 ```
 
 ## Requirements
