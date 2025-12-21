@@ -45,6 +45,19 @@ public class DataStore {
     }
 
     /**
+     * Clear all saved data and reset to initial state.
+     */
+    public void clearAllData() {
+        persistence.clearAllData();
+        users = new HashMap<>();
+        moments = new ArrayList<>();
+        currentUser = null;
+        createSampleData();
+        saveData();
+        System.out.println("[DataStore] Data reset complete");
+    }
+
+    /**
      * Add listener to be notified when external changes are detected.
      */
     public void addChangeListener(Runnable listener) {

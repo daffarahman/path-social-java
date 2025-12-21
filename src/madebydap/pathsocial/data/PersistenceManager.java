@@ -38,6 +38,40 @@ public class PersistenceManager {
     }
 
     /**
+     * Delete all saved data (data.json and images folder).
+     */
+    public boolean clearAllData() {
+        try {
+            // Delete data file
+            if (Files.exists(dataPath)) {
+                Files.delete(dataPath);
+            }
+            
+            // Delete all images
+            if (Files.exists(imagesPath)) {
+                Files.walk(imagesPath)
+                    .sorted((a, b) -> b.compareTo(a)) // reverse order to delete files first
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            System.err.println("[Persistence] Failed to delete: " + path);
+                        }
+                    });
+            }
+            
+            // Recreate images directory
+            Files.createDirectories(imagesPath);
+            
+            System.out.println("[Persistence] All data cleared!");
+            return true;
+        } catch (IOException e) {
+            System.err.println("[Persistence] Failed to clear data: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Check if data file has been modified externally.
      */
     public boolean hasExternalChanges() {

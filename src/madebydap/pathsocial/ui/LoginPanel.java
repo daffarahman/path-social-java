@@ -99,6 +99,21 @@ public class LoginPanel extends JPanel {
         });
         container.add(switchModeLabel);
 
+        container.add(Box.createVerticalStrut(30));
+
+        // Clear data option
+        JLabel clearDataLabel = new JLabel("Clear All Data");
+        clearDataLabel.setFont(PathFonts.SMALL);
+        clearDataLabel.setForeground(PathColors.ERROR);
+        clearDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        clearDataLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        clearDataLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                handleClearData();
+            }
+        });
+        container.add(clearDataLabel);
+
         add(container);
     }
 
@@ -232,5 +247,25 @@ public class LoginPanel extends JPanel {
         displayNameContainer.setVisible(false);
         actionButton.setText("Sign In");
         switchModeLabel.setText("Create an account");
+    }
+
+    private void handleClearData() {
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "This will delete ALL saved data including:\n• All users and accounts\n• All moments and posts\n• All uploaded images\n\nAre you sure?",
+            "Clear All Data",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            DataStore.getInstance().clearAllData();
+            JOptionPane.showMessageDialog(
+                this,
+                "All data has been cleared.\nSample users have been recreated.",
+                "Data Cleared",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
 }
