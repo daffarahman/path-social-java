@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    Path Clone MVP - Build Script
+echo    Path Social - Build Script
 echo ========================================
 echo.
 
