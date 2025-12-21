@@ -9,21 +9,46 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Main application frame with bottom navigation, FAB, and real-time sync.
+ * Frame utama aplikasi Path Social.
+ * Mengelola navigasi antar panel menggunakan CardLayout.
+ * Mendukung sinkronisasi real-time dan memiliki FAB untuk membuat moment.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class MainFrame extends JFrame {
+    
+    /** Layout untuk switching antar panel */
     private CardLayout cardLayout;
+    
+    /** Panel utama yang berisi semua panel konten */
     private JPanel mainPanel;
+    
+    /** Navigation bar di bagian bawah */
     private BottomNavBar bottomNav;
+    
+    /** Floating Action Button untuk membuat moment */
     private FloatingActionButton fab;
     
+    /** Panel login */
     private LoginPanel loginPanel;
+    
+    /** Panel timeline */
     private TimelinePanel timelinePanel;
+    
+    /** Panel profil pengguna */
     private ProfilePanel profilePanel;
+    
+    /** Panel daftar teman */
     private FriendsPanel friendsPanel;
     
+    /** Nama panel yang sedang aktif */
     private String currentPanelName = "login";
 
+    /**
+     * Konstruktor MainFrame.
+     * Menginisialisasi komponen UI dan listener untuk sinkronisasi.
+     */
     public MainFrame() {
         setTitle("Path - Share Life");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,6 +60,10 @@ public class MainFrame extends JFrame {
         setupChangeListener();
     }
 
+    /**
+     * Menginisialisasi semua komponen UI.
+     * Menggunakan JLayeredPane untuk FAB overlay.
+     */
     private void initComponents() {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
@@ -93,7 +122,8 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Setup listener for real-time data sync.
+     * Mengatur listener untuk sinkronisasi real-time.
+     * Dipanggil saat ada perubahan data dari instance lain.
      */
     private void setupChangeListener() {
         DataStore.getInstance().addChangeListener(() -> {
@@ -102,6 +132,9 @@ public class MainFrame extends JFrame {
         });
     }
 
+    /**
+     * Merefresh panel yang sedang aktif.
+     */
     private void refreshCurrentPanel() {
         switch (currentPanelName) {
             case "timeline":
@@ -116,6 +149,11 @@ public class MainFrame extends JFrame {
         }
     }
 
+    /**
+     * Menampilkan panel tertentu dan mengupdate navigasi.
+     * 
+     * @param panelName nama panel yang akan ditampilkan ("login", "timeline", "profile", "friends")
+     */
     public void showPanel(String panelName) {
         currentPanelName = panelName;
         cardLayout.show(mainPanel, panelName);

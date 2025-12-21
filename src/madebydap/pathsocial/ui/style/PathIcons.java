@@ -7,10 +7,22 @@ import java.awt.*;
 import java.awt.geom.*;
 
 /**
- * Custom painted icons for the Path app.
+ * Kelas yang mendefinisikan icon custom untuk aplikasi Path Social.
+ * Setiap icon digambar menggunakan Java 2D Graphics.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class PathIcons {
     
+    /**
+     * Mengambil icon berdasarkan tipe moment.
+     * 
+     * @param type tipe moment
+     * @param size ukuran icon dalam pixel
+     * @param color warna icon
+     * @return Icon yang sesuai dengan tipe moment
+     */
     public static Icon getMomentIcon(MomentType type, int size, Color color) {
         switch (type) {
             case AWAKE: return new SunIcon(size, color);
@@ -24,7 +36,9 @@ public class PathIcons {
         }
     }
 
-    // Sun icon for Awake
+    /**
+     * Icon matahari untuk moment AWAKE.
+     */
     public static class SunIcon implements Icon {
         private final int size;
         private final Color color;
@@ -65,7 +79,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Moon icon for Asleep
+    /**
+     * Icon bulan untuk moment ASLEEP.
+     */
     public static class MoonIcon implements Icon {
         private final int size;
         private final Color color;
@@ -97,7 +113,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Music icon
+    /**
+     * Icon not musik untuk moment MUSIC.
+     */
     public static class MusicIcon implements Icon {
         private final int size;
         private final Color color;
@@ -134,7 +152,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Camera icon for Photo
+    /**
+     * Icon kamera untuk moment PHOTO.
+     */
     public static class CameraIcon implements Icon {
         private final int size;
         private final Color color;
@@ -169,7 +189,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Location pin icon
+    /**
+     * Icon pin lokasi untuk moment LOCATION.
+     */
     public static class LocationIcon implements Icon {
         private final int size;
         private final Color color;
@@ -186,31 +208,24 @@ public class PathIcons {
             g2.setColor(color);
             g2.translate(x, y);
 
-            // Draw map pin shape - teardrop/balloon style
             int pinWidth = (int)(size * 0.7);
             int pinHeight = (int)(size * 0.85);
             int startX = (size - pinWidth) / 2;
             int startY = size / 10;
             
-            // Main pin body - rounded top with pointed bottom
             Path2D pin = new Path2D.Float();
             int radius = pinWidth / 2;
             int centerX = size / 2;
             int bottomY = startY + pinHeight;
             
-            // Start from bottom point
             pin.moveTo(centerX, bottomY);
-            // Left curve up to top
             pin.quadTo(startX - radius/3, startY + radius, startX, startY + radius);
-            // Top arc (semicircle)
             pin.curveTo(startX, startY, centerX, startY, centerX, startY);
             pin.curveTo(centerX, startY, startX + pinWidth, startY, startX + pinWidth, startY + radius);
-            // Right curve down to bottom point
             pin.quadTo(startX + pinWidth + radius/3, startY + radius, centerX, bottomY);
             pin.closePath();
             g2.fill(pin);
             
-            // Inner circle (white dot)
             g2.setColor(Color.WHITE);
             int dotSize = pinWidth / 2;
             g2.fillOval(centerX - dotSize/2, startY + radius/2, dotSize, dotSize);
@@ -224,7 +239,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Thought bubble icon
+    /**
+     * Icon gelembung pikiran untuk moment THOUGHT.
+     */
     public static class ThoughtIcon implements Icon {
         private final int size;
         private final Color color;
@@ -257,7 +274,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Friendship icon (two people)
+    /**
+     * Icon dua orang untuk moment FRIENDSHIP.
+     */
     public static class FriendshipIcon implements Icon {
         private final int size;
         private final Color color;
@@ -277,14 +296,10 @@ public class PathIcons {
             int headSize = size / 4;
             int bodyWidth = size / 3;
             
-            // Left person - head
             g2.fillOval(size/4 - headSize/2, size/6, headSize, headSize);
-            // Left person - body
             g2.fillRoundRect(size/4 - bodyWidth/2, size/6 + headSize, bodyWidth, size/2, bodyWidth/2, bodyWidth/2);
             
-            // Right person - head
             g2.fillOval(size*3/4 - headSize/2, size/6, headSize, headSize);
-            // Right person - body
             g2.fillRoundRect(size*3/4 - bodyWidth/2, size/6 + headSize, bodyWidth, size/2, bodyWidth/2, bodyWidth/2);
 
             g2.dispose();
@@ -296,7 +311,9 @@ public class PathIcons {
         public int getIconHeight() { return size; }
     }
 
-    // Plus icon
+    /**
+     * Icon plus.
+     */
     public static class PlusIcon implements Icon {
         private final int size;
         private final Color color;

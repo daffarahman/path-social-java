@@ -6,29 +6,30 @@ import madebydap.pathsocial.ui.MainFrame;
 import javax.swing.*;
 
 /**
- * Path Clone MVP - A social network focused on privacy and close friends.
- * 
- * Features:
- * - Share moments (Awake, Asleep, Music, Photo, Location, Thought)
- * - Friend limit of 50 (Dunbar's Number)
- * - Clean light theme UI with FlatLaf
- * - Iconic floating action button
+ * Kelas utama aplikasi Path Social.
+ * Berfungsi sebagai entry point untuk menjalankan aplikasi.
  * 
  * @author madebydap
+ * @version 1.0
  */
 public class App {
+    
+    /**
+     * Method main untuk memulai aplikasi.
+     * Mengatur Look and Feel menggunakan FlatLaf dan menampilkan MainFrame.
+     * 
+     * @param args argumen command line (tidak digunakan)
+     */
     public static void main(String[] args) {
-        // Set FlatLaf Look and Feel
         try {
             FlatLightLaf.setup();
             UIManager.put("Button.arc", 8);
             UIManager.put("Component.arc", 8);
             UIManager.put("TextComponent.arc", 8);
         } catch (Exception e) {
-            System.err.println("Failed to initialize FlatLaf");
+            System.err.println("Gagal mengatur FlatLaf: " + e.getMessage());
         }
 
-        // Launch the application
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame();
             frame.setVisible(true);

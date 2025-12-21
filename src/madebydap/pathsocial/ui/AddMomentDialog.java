@@ -15,15 +15,35 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 /**
- * Dialog for adding a new moment with image support for PHOTO type.
+ * Dialog untuk membuat moment baru.
+ * Mendukung pemilihan gambar untuk moment tipe PHOTO.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class AddMomentDialog extends JDialog {
+    
+    /** Tipe moment yang akan dibuat */
     private final MomentType momentType;
+    
+    /** Area input konten */
     private JTextArea contentArea;
+    
+    /** Label preview gambar */
     private JLabel imagePreview;
+    
+    /** Path gambar yang dipilih */
     private String selectedImagePath;
+    
+    /** Flag apakah dialog dikonfirmasi */
     private boolean confirmed = false;
 
+    /**
+     * Konstruktor AddMomentDialog.
+     * 
+     * @param parent frame parent
+     * @param momentType tipe moment yang akan dibuat
+     */
     public AddMomentDialog(JFrame parent, MomentType momentType) {
         super(parent, true);
         this.momentType = momentType;
@@ -36,6 +56,9 @@ public class AddMomentDialog extends JDialog {
         initComponents();
     }
 
+    /**
+     * Menginisialisasi komponen UI.
+     */
     private void initComponents() {
         JPanel main = new JPanel(new BorderLayout());
         main.setBackground(PathColors.BACKGROUND_WHITE);
@@ -63,28 +86,7 @@ public class AddMomentDialog extends JDialog {
 
         // Image picker for PHOTO type
         if (momentType == MomentType.PHOTO) {
-            JPanel imagePanel = new JPanel(new BorderLayout());
-            imagePanel.setOpaque(false);
-            imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
-            imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            imagePreview = new JLabel("Click to select image", SwingConstants.CENTER);
-            imagePreview.setFont(PathFonts.BODY);
-            imagePreview.setForeground(PathColors.TEXT_MUTED);
-            imagePreview.setPreferredSize(new Dimension(340, 150));
-            imagePreview.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(PathColors.BORDER, 2, true),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
-            ));
-            imagePreview.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            imagePreview.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    selectImage();
-                }
-            });
-            imagePanel.add(imagePreview, BorderLayout.CENTER);
-            contentPanel.add(imagePanel);
+            contentPanel.add(createImagePicker());
         }
 
         // Caption/content input
@@ -128,6 +130,39 @@ public class AddMomentDialog extends JDialog {
         setContentPane(main);
     }
 
+    /**
+     * Membuat panel pemilih gambar.
+     * 
+     * @return JPanel pemilih gambar
+     */
+    private JPanel createImagePicker() {
+        JPanel imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setOpaque(false);
+        imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
+        imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        imagePreview = new JLabel("Click to select image", SwingConstants.CENTER);
+        imagePreview.setFont(PathFonts.BODY);
+        imagePreview.setForeground(PathColors.TEXT_MUTED);
+        imagePreview.setPreferredSize(new Dimension(340, 150));
+        imagePreview.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PathColors.BORDER, 2, true),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        imagePreview.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        imagePreview.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                selectImage();
+            }
+        });
+        imagePanel.add(imagePreview, BorderLayout.CENTER);
+        return imagePanel;
+    }
+
+    /**
+     * Membuka dialog pemilihan gambar.
+     */
     private void selectImage() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select Image");
@@ -137,11 +172,9 @@ public class AddMomentDialog extends JDialog {
             File file = chooser.getSelectedFile();
             selectedImagePath = file.getAbsolutePath();
             
-            // Show preview
             try {
                 BufferedImage img = ImageIO.read(file);
                 if (img != null) {
-                    // Scale to fit preview
                     int maxWidth = 320;
                     int maxHeight = 140;
                     double scale = Math.min((double) maxWidth / img.getWidth(), (double) maxHeight / img.getHeight());
@@ -158,6 +191,14 @@ public class AddMomentDialog extends JDialog {
         }
     }
 
+    /**
+     * Membuat tombol dengan style custom.
+     * 
+     * @param text teks tombol
+     * @param bgColor warna background
+     * @param fgColor warna foreground
+     * @return JButton tombol
+     */
     private JButton createButton(String text, Color bgColor, Color fgColor) {
         JButton button = new JButton(text) {
             @Override
@@ -195,10 +236,12 @@ public class AddMomentDialog extends JDialog {
         return button;
     }
 
+    /**
+     * Menyimpan moment ke DataStore.
+     */
     private void shareMoment() {
         String content = contentArea.getText().trim();
         
-        // For PHOTO, image is required but caption is optional
         if (momentType == MomentType.PHOTO) {
             if (selectedImagePath == null || selectedImagePath.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please select an image", "Image Required", JOptionPane.WARNING_MESSAGE);
@@ -222,6 +265,11 @@ public class AddMomentDialog extends JDialog {
         dispose();
     }
 
+    /**
+     * Memeriksa apakah dialog dikonfirmasi.
+     * 
+     * @return true jika moment berhasil dibuat
+     */
     public boolean isConfirmed() {
         return confirmed;
     }

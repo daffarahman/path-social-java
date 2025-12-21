@@ -2,7 +2,6 @@ package madebydap.pathsocial.ui;
 
 import madebydap.pathsocial.data.DataStore;
 import madebydap.pathsocial.model.User;
-import madebydap.pathsocial.ui.components.RoundedPanel;
 import madebydap.pathsocial.ui.style.PathColors;
 import madebydap.pathsocial.ui.style.PathFonts;
 
@@ -10,18 +9,43 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Login and registration panel - clean, minimal design.
+ * Panel untuk login dan registrasi pengguna.
+ * Mendukung mode login dan mode registrasi yang dapat diswitch.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class LoginPanel extends JPanel {
+    
+    /** Referensi ke frame utama */
     private final MainFrame mainFrame;
+    
+    /** Field input username */
     private JTextField usernameField;
+    
+    /** Field input password */
     private JPasswordField passwordField;
+    
+    /** Field input display name (hanya untuk registrasi) */
     private JTextField displayNameField;
+    
+    /** Flag mode registrasi */
     private boolean isRegisterMode = false;
+    
+    /** Container untuk field display name */
     private JPanel displayNameContainer;
+    
+    /** Tombol aksi (Sign In / Create Account) */
     private JButton actionButton;
+    
+    /** Label untuk switch mode */
     private JLabel switchModeLabel;
 
+    /**
+     * Konstruktor LoginPanel.
+     * 
+     * @param mainFrame referensi ke frame utama
+     */
     public LoginPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setBackground(PathColors.BACKGROUND_WHITE);
@@ -29,6 +53,9 @@ public class LoginPanel extends JPanel {
         initComponents();
     }
 
+    /**
+     * Menginisialisasi komponen UI.
+     */
     private void initComponents() {
         JPanel container = new JPanel();
         container.setBackground(PathColors.BACKGROUND_WHITE);
@@ -117,6 +144,12 @@ public class LoginPanel extends JPanel {
         add(container);
     }
 
+    /**
+     * Membuat label untuk field input.
+     * 
+     * @param text teks label
+     * @return JLabel yang sudah di-style
+     */
     private JLabel createFieldLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(PathFonts.SMALL);
@@ -126,6 +159,11 @@ public class LoginPanel extends JPanel {
         return label;
     }
 
+    /**
+     * Membuat text field dengan styling standar.
+     * 
+     * @return JTextField yang sudah di-style
+     */
     private JTextField createTextField() {
         JTextField field = new JTextField(18);
         field.setFont(PathFonts.BODY);
@@ -141,6 +179,11 @@ public class LoginPanel extends JPanel {
         return field;
     }
 
+    /**
+     * Membuat password field dengan styling standar.
+     * 
+     * @return JPasswordField yang sudah di-style
+     */
     private JPasswordField createPasswordField() {
         JPasswordField field = new JPasswordField(18);
         field.setFont(PathFonts.BODY);
@@ -156,6 +199,12 @@ public class LoginPanel extends JPanel {
         return field;
     }
 
+    /**
+     * Membuat tombol primary dengan styling Path.
+     * 
+     * @param text teks tombol
+     * @return JButton yang sudah di-style
+     */
     private JButton createPrimaryButton(String text) {
         JButton button = new JButton(text) {
             @Override
@@ -190,6 +239,9 @@ public class LoginPanel extends JPanel {
         return button;
     }
 
+    /**
+     * Toggle antara mode login dan registrasi.
+     */
     private void toggleMode() {
         isRegisterMode = !isRegisterMode;
         displayNameContainer.setVisible(isRegisterMode);
@@ -199,6 +251,10 @@ public class LoginPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Handler untuk tombol aksi.
+     * Melakukan login atau registrasi sesuai mode.
+     */
     private void handleAction() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -235,10 +291,18 @@ public class LoginPanel extends JPanel {
         }
     }
 
+    /**
+     * Menampilkan dialog error.
+     * 
+     * @param message pesan error
+     */
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
+    /**
+     * Mereset form ke kondisi awal.
+     */
     public void reset() {
         usernameField.setText("");
         passwordField.setText("");
@@ -249,6 +313,10 @@ public class LoginPanel extends JPanel {
         switchModeLabel.setText("Create an account");
     }
 
+    /**
+     * Handler untuk menghapus semua data.
+     * Menampilkan konfirmasi sebelum menghapus.
+     */
     private void handleClearData() {
         int confirm = JOptionPane.showConfirmDialog(
             this,

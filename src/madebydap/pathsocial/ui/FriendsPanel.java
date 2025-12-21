@@ -10,14 +10,31 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Friends panel with same header as all screens.
+ * Panel daftar teman dengan fitur pencarian dan penambahan teman.
+ * Menampilkan daftar teman dan hasil pencarian pengguna.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class FriendsPanel extends JPanel {
+    
+    /** Referensi ke frame utama */
     private final MainFrame mainFrame;
+    
+    /** Container daftar teman */
     private JPanel friendsContainer;
+    
+    /** Field pencarian */
     private JTextField searchField;
+    
+    /** Panel hasil pencarian */
     private JPanel searchResultsPanel;
 
+    /**
+     * Konstruktor FriendsPanel.
+     * 
+     * @param mainFrame referensi ke frame utama
+     */
     public FriendsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setBackground(PathColors.BACKGROUND);
@@ -25,6 +42,9 @@ public class FriendsPanel extends JPanel {
         initComponents();
     }
 
+    /**
+     * Menginisialisasi komponen UI.
+     */
     private void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
@@ -56,6 +76,11 @@ public class FriendsPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Membuat header dengan logo Path.
+     * 
+     * @return JPanel header
+     */
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
@@ -73,6 +98,11 @@ public class FriendsPanel extends JPanel {
         return header;
     }
 
+    /**
+     * Membuat section pencarian teman.
+     * 
+     * @return JPanel section pencarian
+     */
     private JPanel createSearchSection() {
         JPanel section = new JPanel();
         section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
@@ -104,6 +134,27 @@ public class FriendsPanel extends JPanel {
         searchField.addActionListener(e -> performSearch());
         searchPanel.add(searchField, BorderLayout.CENTER);
 
+        JButton searchBtn = createSearchButton();
+        searchPanel.add(searchBtn, BorderLayout.EAST);
+
+        section.add(searchPanel);
+        section.add(Box.createVerticalStrut(10));
+
+        searchResultsPanel = new JPanel();
+        searchResultsPanel.setLayout(new BoxLayout(searchResultsPanel, BoxLayout.Y_AXIS));
+        searchResultsPanel.setOpaque(false);
+        searchResultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        section.add(searchResultsPanel);
+
+        return section;
+    }
+
+    /**
+     * Membuat tombol search dengan style custom.
+     * 
+     * @return JButton tombol search
+     */
+    private JButton createSearchButton() {
         JButton searchBtn = new JButton("Search") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -124,20 +175,12 @@ public class FriendsPanel extends JPanel {
         searchBtn.setBorderPainted(false);
         searchBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         searchBtn.addActionListener(e -> performSearch());
-        searchPanel.add(searchBtn, BorderLayout.EAST);
-
-        section.add(searchPanel);
-        section.add(Box.createVerticalStrut(10));
-
-        searchResultsPanel = new JPanel();
-        searchResultsPanel.setLayout(new BoxLayout(searchResultsPanel, BoxLayout.Y_AXIS));
-        searchResultsPanel.setOpaque(false);
-        searchResultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        section.add(searchResultsPanel);
-
-        return section;
+        return searchBtn;
     }
 
+    /**
+     * Melakukan pencarian pengguna berdasarkan kata kunci.
+     */
     private void performSearch() {
         String query = searchField.getText().trim();
         searchResultsPanel.removeAll();
@@ -167,12 +210,21 @@ public class FriendsPanel extends JPanel {
         searchResultsPanel.repaint();
     }
 
+    /**
+     * Membuat baris untuk menampilkan pengguna.
+     * 
+     * @param user pengguna yang ditampilkan
+     * @param isFriend apakah pengguna adalah teman
+     * @param showAction apakah menampilkan tombol aksi
+     * @return JPanel baris pengguna
+     */
     private JPanel createUserRow(User user, boolean isFriend, boolean showAction) {
         JPanel row = new JPanel(new BorderLayout(12, 0));
         row.setOpaque(false);
         row.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
+        // Avatar
         JPanel avatar = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -194,6 +246,7 @@ public class FriendsPanel extends JPanel {
         avatar.setPreferredSize(new Dimension(32, 32));
         row.add(avatar, BorderLayout.WEST);
 
+        // Name panel
         JPanel namePanel = new JPanel();
         namePanel.setOpaque(false);
         namePanel.setLayout(new BoxLayout(namePanel, BoxLayout.Y_AXIS));
@@ -210,6 +263,7 @@ public class FriendsPanel extends JPanel {
 
         row.add(namePanel, BorderLayout.CENTER);
 
+        // Action
         if (showAction) {
             if (isFriend) {
                 JLabel friendLabel = new JLabel("Friend");
@@ -224,20 +278,7 @@ public class FriendsPanel extends JPanel {
                 addLabel.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked(java.awt.event.MouseEvent e) {
-                        User currentUser = DataStore.getInstance().getCurrentUser();
-                        if (!currentUser.canAddFriend()) {
-                            JOptionPane.showMessageDialog(FriendsPanel.this,
-                                "You've reached the limit of " + User.MAX_FRIENDS + " friends.",
-                                "Limit Reached",
-                                JOptionPane.INFORMATION_MESSAGE);
-                            return;
-                        }
-                        
-                        boolean success = DataStore.getInstance().addFriend(currentUser.getId(), user.getId());
-                        if (success) {
-                            refresh();
-                            performSearch();
-                        }
+                        handleAddFriend(user);
                     }
                 });
                 row.add(addLabel, BorderLayout.EAST);
@@ -247,6 +288,31 @@ public class FriendsPanel extends JPanel {
         return row;
     }
 
+    /**
+     * Handler untuk menambahkan teman.
+     * 
+     * @param user pengguna yang akan ditambahkan sebagai teman
+     */
+    private void handleAddFriend(User user) {
+        User currentUser = DataStore.getInstance().getCurrentUser();
+        if (!currentUser.canAddFriend()) {
+            JOptionPane.showMessageDialog(this,
+                "You've reached the limit of " + User.MAX_FRIENDS + " friends.",
+                "Limit Reached",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        boolean success = DataStore.getInstance().addFriend(currentUser.getId(), user.getId());
+        if (success) {
+            refresh();
+            performSearch();
+        }
+    }
+
+    /**
+     * Merefresh daftar teman.
+     */
     public void refresh() {
         removeAll();
         initComponents();
@@ -280,7 +346,6 @@ public class FriendsPanel extends JPanel {
                     friendsContainer.add(row);
                 }
             }
-            // Add bottom padding to prevent last item from being cut off
             friendsContainer.add(Box.createVerticalStrut(80));
         }
 

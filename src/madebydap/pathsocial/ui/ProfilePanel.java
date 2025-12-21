@@ -12,12 +12,25 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Profile panel with horizontal layout: avatar left, info right.
+ * Panel profil pengguna dengan layout horizontal.
+ * Menampilkan avatar, info pengguna, tombol logout, dan daftar moment.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class ProfilePanel extends JPanel {
+    
+    /** Referensi ke frame utama */
     private final MainFrame mainFrame;
+    
+    /** Panel konten utama */
     private JPanel contentPanel;
 
+    /**
+     * Konstruktor ProfilePanel.
+     * 
+     * @param mainFrame referensi ke frame utama
+     */
     public ProfilePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setBackground(PathColors.BACKGROUND);
@@ -25,6 +38,9 @@ public class ProfilePanel extends JPanel {
         initComponents();
     }
 
+    /**
+     * Menginisialisasi komponen UI.
+     */
     private void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
@@ -41,6 +57,11 @@ public class ProfilePanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Membuat header dengan logo Path.
+     * 
+     * @return JPanel header
+     */
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
@@ -58,6 +79,10 @@ public class ProfilePanel extends JPanel {
         return header;
     }
 
+    /**
+     * Merefresh konten profil.
+     * Memuat ulang data pengguna dan moment dari DataStore.
+     */
     public void refresh() {
         contentPanel.removeAll();
 
@@ -135,6 +160,50 @@ public class ProfilePanel extends JPanel {
         logoutSection.setBackground(PathColors.BACKGROUND);
         logoutSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
 
+        JButton logoutBtn = createLogoutButton();
+        logoutSection.add(logoutBtn);
+        contentPanel.add(logoutSection);
+
+        // Moments section
+        JPanel sectionHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 12));
+        sectionHeader.setBackground(PathColors.BACKGROUND);
+        sectionHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        
+        JLabel momentsTitle = new JLabel("My Moments");
+        momentsTitle.setFont(PathFonts.SMALL_BOLD);
+        momentsTitle.setForeground(PathColors.TEXT_MUTED);
+        sectionHeader.add(momentsTitle);
+        contentPanel.add(sectionHeader);
+
+        List<Moment> userMoments = DataStore.getInstance().getUserMoments(user.getId());
+        if (userMoments.isEmpty()) {
+            JPanel emptyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            emptyPanel.setBackground(PathColors.BACKGROUND_WHITE);
+            emptyPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
+            
+            JLabel emptyLabel = new JLabel("No moments yet");
+            emptyLabel.setFont(PathFonts.BODY);
+            emptyLabel.setForeground(PathColors.TEXT_MUTED);
+            emptyPanel.add(emptyLabel);
+            contentPanel.add(emptyPanel);
+        } else {
+            for (Moment moment : userMoments) {
+                MomentCard card = new MomentCard(moment);
+                contentPanel.add(card);
+            }
+        }
+
+        contentPanel.add(Box.createVerticalStrut(80));
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    /**
+     * Membuat tombol logout dengan style custom.
+     * 
+     * @return JButton tombol logout
+     */
+    private JButton createLogoutButton() {
         JButton logoutBtn = new JButton("Logout") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -169,42 +238,6 @@ public class ProfilePanel extends JPanel {
             DataStore.getInstance().logout();
             mainFrame.showPanel("login");
         });
-        logoutSection.add(logoutBtn);
-        contentPanel.add(logoutSection);
-
-        // Moments section
-        JPanel sectionHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 12));
-        sectionHeader.setBackground(PathColors.BACKGROUND);
-        sectionHeader.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        
-        JLabel momentsTitle = new JLabel("My Moments");
-        momentsTitle.setFont(PathFonts.SMALL_BOLD);
-        momentsTitle.setForeground(PathColors.TEXT_MUTED);
-        sectionHeader.add(momentsTitle);
-        contentPanel.add(sectionHeader);
-
-        List<Moment> userMoments = DataStore.getInstance().getUserMoments(user.getId());
-        if (userMoments.isEmpty()) {
-            JPanel emptyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            emptyPanel.setBackground(PathColors.BACKGROUND_WHITE);
-            emptyPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
-            
-            JLabel emptyLabel = new JLabel("No moments yet");
-            emptyLabel.setFont(PathFonts.BODY);
-            emptyLabel.setForeground(PathColors.TEXT_MUTED);
-            emptyPanel.add(emptyLabel);
-            contentPanel.add(emptyPanel);
-        } else {
-            for (Moment moment : userMoments) {
-                MomentCard card = new MomentCard(moment);
-                contentPanel.add(card);
-            }
-        }
-
-        // Bottom padding
-        contentPanel.add(Box.createVerticalStrut(80));
-
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        return logoutBtn;
     }
 }

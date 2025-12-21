@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"madebydap.pathsocial"},{"l":"madebydap.pathsocial.data"},{"l":"madebydap.pathsocial.model"},{"l":"madebydap.pathsocial.ui"},{"l":"madebydap.pathsocial.ui.components"},{"l":"madebydap.pathsocial.ui.style"}];updateSearchResults();

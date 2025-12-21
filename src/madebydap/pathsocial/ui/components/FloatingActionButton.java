@@ -11,21 +11,46 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
- * Path's signature red floating action button with custom icons.
- * Only shows user-creatable moment types (excludes FRIENDSHIP).
+ * Floating Action Button merah khas Path dengan radial menu.
+ * Menampilkan pilihan tipe moment dalam menu radial saat diklik.
+ * Hanya menampilkan tipe moment yang bisa dibuat user (excludes FRIENDSHIP).
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class FloatingActionButton extends JButton {
+    
+    /** Callback saat tipe moment dipilih */
     private Consumer<MomentType> onMomentTypeSelected;
+    
+    /** Window popup untuk radial menu */
     private JWindow popupWindow;
+    
+    /** Timer untuk animasi */
     private Timer animationTimer;
+    
+    /** Progress animasi (0-1) */
     private float animationProgress = 0f;
+    
+    /** Flag apakah menu sedang expanded */
     private boolean expanded = false;
 
+    /** Ukuran tombol utama */
     private static final int BUTTON_SIZE = 52;
+    
+    /** Ukuran tombol mini di radial menu */
     private static final int MINI_BUTTON_SIZE = 40;
+    
+    /** Radius radial menu */
     private static final int EXPAND_RADIUS = 72;
+    
+    /** Ukuran popup window */
     private static final int POPUP_SIZE = 240;
 
+    /**
+     * Konstruktor FloatingActionButton.
+     * Membuat tombol merah dengan icon plus.
+     */
     public FloatingActionButton() {
         setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
         setContentAreaFilled(false);
@@ -36,16 +61,29 @@ public class FloatingActionButton extends JButton {
         addActionListener(e -> toggleExpanded());
     }
 
+    /**
+     * Mengatur callback untuk pemilihan tipe moment.
+     * 
+     * @param listener callback yang menerima MomentType
+     */
     public void setOnMomentTypeSelected(Consumer<MomentType> listener) {
         this.onMomentTypeSelected = listener;
     }
 
+    /**
+     * Mengambil daftar tipe moment yang bisa dibuat user.
+     * 
+     * @return array MomentType yang user-creatable
+     */
     private MomentType[] getCreatableTypes() {
         return Arrays.stream(MomentType.values())
                 .filter(MomentType::isUserCreatable)
                 .toArray(MomentType[]::new);
     }
 
+    /**
+     * Toggle antara expanded dan collapsed.
+     */
     private void toggleExpanded() {
         if (expanded) {
             collapse();
@@ -54,6 +92,9 @@ public class FloatingActionButton extends JButton {
         }
     }
 
+    /**
+     * Membuka radial menu dengan animasi.
+     */
     private void expand() {
         expanded = true;
         
@@ -109,6 +150,9 @@ public class FloatingActionButton extends JButton {
         animationTimer.start();
     }
 
+    /**
+     * Menutup radial menu dengan animasi.
+     */
     private void collapse() {
         if (animationTimer != null) animationTimer.stop();
         
@@ -129,6 +173,12 @@ public class FloatingActionButton extends JButton {
         animationTimer.start();
     }
 
+    /**
+     * Mendapatkan tipe moment pada posisi tertentu di radial menu.
+     * 
+     * @param point posisi mouse
+     * @return MomentType yang diklik atau null
+     */
     private MomentType getMomentTypeAtPoint(Point point) {
         if (animationProgress < 0.8f) return null;
 
@@ -151,6 +201,11 @@ public class FloatingActionButton extends JButton {
         return null;
     }
 
+    /**
+     * Menggambar radial menu.
+     * 
+     * @param g2 graphics context
+     */
     private void drawRadialMenu(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -163,7 +218,7 @@ public class FloatingActionButton extends JButton {
             g2.fillOval(center.x - size/2, center.y - size/2, size, size);
         }
 
-        // Mini buttons with icons (only user-creatable types)
+        // Mini buttons with icons
         MomentType[] types = getCreatableTypes();
         int count = types.length;
         double angleStep = 2 * Math.PI / count;
@@ -196,16 +251,20 @@ public class FloatingActionButton extends JButton {
         drawMainButtonAt(g2, center.x, center.y);
     }
 
+    /**
+     * Menggambar tombol utama pada posisi tertentu.
+     * 
+     * @param g2 graphics context
+     * @param cx posisi x tengah
+     * @param cy posisi y tengah
+     */
     private void drawMainButtonAt(Graphics2D g2, int cx, int cy) {
-        // Shadow
         g2.setColor(new Color(0, 0, 0, 40));
         g2.fillOval(cx - BUTTON_SIZE / 2 + 2, cy - BUTTON_SIZE / 2 + 2, BUTTON_SIZE, BUTTON_SIZE);
 
-        // Button
         g2.setColor(PathColors.PRIMARY);
         g2.fillOval(cx - BUTTON_SIZE / 2, cy - BUTTON_SIZE / 2, BUTTON_SIZE, BUTTON_SIZE);
 
-        // X icon
         g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 

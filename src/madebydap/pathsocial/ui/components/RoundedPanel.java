@@ -4,18 +4,41 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * A panel with rounded corners for premium look.
+ * Panel dengan sudut melengkung untuk tampilan premium.
+ * Mendukung customisasi radius, warna background, dan border.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class RoundedPanel extends JPanel {
+    
+    /** Radius sudut panel */
     private int cornerRadius;
+    
+    /** Warna background panel */
     private Color backgroundColor;
+    
+    /** Flag untuk menggambar border */
     private boolean drawBorder;
+    
+    /** Warna border */
     private Color borderColor;
 
+    /**
+     * Konstruktor dengan radius saja.
+     * 
+     * @param cornerRadius radius sudut dalam pixel
+     */
     public RoundedPanel(int cornerRadius) {
         this(cornerRadius, null);
     }
 
+    /**
+     * Konstruktor dengan radius dan warna background.
+     * 
+     * @param cornerRadius radius sudut dalam pixel
+     * @param backgroundColor warna background panel
+     */
     public RoundedPanel(int cornerRadius, Color backgroundColor) {
         this.cornerRadius = cornerRadius;
         this.backgroundColor = backgroundColor;
@@ -24,21 +47,41 @@ public class RoundedPanel extends JPanel {
         setOpaque(false);
     }
 
+    /**
+     * Mengatur radius sudut panel.
+     * 
+     * @param radius radius baru dalam pixel
+     */
     public void setCornerRadius(int radius) {
         this.cornerRadius = radius;
         repaint();
     }
 
+    /**
+     * Mengatur warna background panel.
+     * 
+     * @param color warna background baru
+     */
     public void setBackgroundColor(Color color) {
         this.backgroundColor = color;
         repaint();
     }
 
+    /**
+     * Mengatur apakah border digambar.
+     * 
+     * @param draw true untuk menggambar border
+     */
     public void setDrawBorder(boolean draw) {
         this.drawBorder = draw;
         repaint();
     }
 
+    /**
+     * Mengatur warna border.
+     * 
+     * @param color warna border baru
+     */
     public void setBorderColor(Color color) {
         this.borderColor = color;
         repaint();

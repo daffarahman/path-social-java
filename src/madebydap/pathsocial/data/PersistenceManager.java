@@ -12,18 +12,36 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * Handles JSON persistence for users and moments.
- * Uses simple text-based JSON parsing (no external libraries).
+ * Kelas untuk mengelola persistensi data ke file JSON.
+ * Menyimpan dan memuat data pengguna serta moment tanpa library eksternal.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class PersistenceManager {
+    
+    /** Nama direktori data (tidak digunakan) */
     private static final String DATA_DIR = "pathdata";
+    
+    /** Nama file data JSON */
     private static final String DATA_FILE = "data.json";
+    
+    /** Nama folder untuk menyimpan gambar */
     private static final String IMAGES_DIR = "images";
     
+    /** Path ke file data */
     private final Path dataPath;
+    
+    /** Path ke folder gambar */
     private final Path imagesPath;
+    
+    /** Waktu modifikasi terakhir file data */
     private long lastModified = 0;
 
+    /**
+     * Konstruktor PersistenceManager.
+     * Membuat direktori yang diperlukan di folder home user.
+     */
     public PersistenceManager() {
         Path baseDir = Paths.get(System.getProperty("user.home"), ".pathsocial");
         this.dataPath = baseDir.resolve(DATA_FILE);
@@ -38,19 +56,19 @@ public class PersistenceManager {
     }
 
     /**
-     * Delete all saved data (data.json and images folder).
+     * Menghapus semua data tersimpan (file JSON dan folder gambar).
+     * 
+     * @return true jika berhasil, false jika gagal
      */
     public boolean clearAllData() {
         try {
-            // Delete data file
             if (Files.exists(dataPath)) {
                 Files.delete(dataPath);
             }
             
-            // Delete all images
             if (Files.exists(imagesPath)) {
                 Files.walk(imagesPath)
-                    .sorted((a, b) -> b.compareTo(a)) // reverse order to delete files first
+                    .sorted((a, b) -> b.compareTo(a))
                     .forEach(path -> {
                         try {
                             Files.delete(path);
@@ -60,7 +78,6 @@ public class PersistenceManager {
                     });
             }
             
-            // Recreate images directory
             Files.createDirectories(imagesPath);
             
             System.out.println("[Persistence] All data cleared!");
@@ -72,7 +89,10 @@ public class PersistenceManager {
     }
 
     /**
-     * Check if data file has been modified externally.
+     * Memeriksa apakah file data telah dimodifikasi oleh proses lain.
+     * Digunakan untuk sinkronisasi antar instance.
+     * 
+     * @return true jika ada perubahan eksternal
      */
     public boolean hasExternalChanges() {
         try {
@@ -83,21 +103,23 @@ public class PersistenceManager {
                 }
             }
         } catch (IOException e) {
-            // Ignore
+            // Abaikan error
         }
         return false;
     }
 
     /**
-     * Copy an image to the app's images directory.
-     * Returns the new path.
+     * Menyalin gambar ke folder aplikasi.
+     * 
+     * @param sourcePath path file gambar sumber
+     * @return path baru gambar setelah disalin
      */
     public String copyImage(String sourcePath) {
         if (sourcePath == null || sourcePath.isEmpty()) return null;
         
         try {
             Path source = Paths.get(sourcePath);
-            if (!Files.exists(source)) return sourcePath; // Already copied or invalid
+            if (!Files.exists(source)) return sourcePath;
             
             String fileName = UUID.randomUUID().toString() + getExtension(sourcePath);
             Path dest = imagesPath.resolve(fileName);
@@ -110,19 +132,27 @@ public class PersistenceManager {
         }
     }
 
+    /**
+     * Mengambil ekstensi file dari path.
+     * 
+     * @param path path file
+     * @return ekstensi file (termasuk titik)
+     */
     private String getExtension(String path) {
         int dot = path.lastIndexOf('.');
         return dot > 0 ? path.substring(dot) : ".jpg";
     }
 
     /**
-     * Save all data to JSON file.
+     * Menyimpan semua data ke file JSON.
+     * 
+     * @param users map pengguna yang akan disimpan
+     * @param moments daftar moment yang akan disimpan
      */
     public void save(Map<String, User> users, List<Moment> moments) {
         StringBuilder json = new StringBuilder();
         json.append("{\n");
         
-        // Users
         json.append("  \"users\": [\n");
         int userCount = 0;
         for (User user : users.values()) {
@@ -132,7 +162,6 @@ public class PersistenceManager {
         }
         json.append("\n  ],\n");
         
-        // Moments
         json.append("  \"moments\": [\n");
         for (int i = 0; i < moments.size(); i++) {
             if (i > 0) json.append(",\n");
@@ -151,6 +180,12 @@ public class PersistenceManager {
         }
     }
 
+    /**
+     * Mengkonversi objek User ke string JSON.
+     * 
+     * @param user objek user
+     * @return string JSON
+     */
     private String userToJson(User user) {
         StringBuilder sb = new StringBuilder();
         sb.append("    {\n");
@@ -169,6 +204,12 @@ public class PersistenceManager {
         return sb.toString();
     }
 
+    /**
+     * Mengkonversi objek Moment ke string JSON.
+     * 
+     * @param moment objek moment
+     * @return string JSON
+     */
     private String momentToJson(Moment moment) {
         StringBuilder sb = new StringBuilder();
         sb.append("    {\n");
@@ -182,6 +223,12 @@ public class PersistenceManager {
         return sb.toString();
     }
 
+    /**
+     * Escape karakter khusus untuk JSON.
+     * 
+     * @param s string yang akan di-escape
+     * @return string yang sudah di-escape
+     */
     private String escape(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\")
@@ -192,7 +239,9 @@ public class PersistenceManager {
     }
 
     /**
-     * Load data from JSON file.
+     * Memuat data dari file JSON.
+     * 
+     * @return LoadResult yang berisi users dan moments
      */
     public LoadResult load() {
         LoadResult result = new LoadResult();
@@ -206,10 +255,7 @@ public class PersistenceManager {
             String json = Files.readString(dataPath);
             lastModified = Files.getLastModifiedTime(dataPath).toMillis();
             
-            // Parse users
             result.users = parseUsers(json);
-            
-            // Parse moments
             result.moments = parseMoments(json);
             
             System.out.println("[Persistence] Loaded " + result.users.size() + " users, " + result.moments.size() + " moments");
@@ -220,6 +266,12 @@ public class PersistenceManager {
         return result;
     }
 
+    /**
+     * Parsing data pengguna dari string JSON.
+     * 
+     * @param json string JSON
+     * @return map pengguna
+     */
     private Map<String, User> parseUsers(String json) {
         Map<String, User> users = new HashMap<>();
         
@@ -241,7 +293,6 @@ public class PersistenceManager {
             
             User user = new User(id, username, password, displayName);
             
-            // Parse friend IDs
             Pattern friendPattern = Pattern.compile("\"([^\"]+)\"");
             Matcher friendMatcher = friendPattern.matcher(friendsStr);
             while (friendMatcher.find()) {
@@ -254,6 +305,12 @@ public class PersistenceManager {
         return users;
     }
 
+    /**
+     * Parsing data moment dari string JSON.
+     * 
+     * @param json string JSON
+     * @return daftar moment
+     */
     private List<Moment> parseMoments(String json) {
         List<Moment> moments = new ArrayList<>();
         
@@ -282,6 +339,12 @@ public class PersistenceManager {
         return moments;
     }
 
+    /**
+     * Unescape karakter khusus dari JSON.
+     * 
+     * @param s string yang akan di-unescape
+     * @return string yang sudah di-unescape
+     */
     private String unescape(String s) {
         if (s == null) return "";
         return s.replace("\\n", "\n")
@@ -291,8 +354,15 @@ public class PersistenceManager {
                 .replace("\\\\", "\\");
     }
 
+    /**
+     * Kelas untuk menyimpan hasil load data.
+     */
     public static class LoadResult {
+        
+        /** Map pengguna yang dimuat */
         public Map<String, User> users = new HashMap<>();
+        
+        /** Daftar moment yang dimuat */
         public List<Moment> moments = new ArrayList<>();
     }
 }

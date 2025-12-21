@@ -14,17 +14,37 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Timeline panel with auto-refresh and clean Path-style red header.
+ * Panel timeline yang menampilkan daftar moment dari pengguna dan teman.
+ * Mendukung auto-refresh untuk sinkronisasi real-time.
+ * 
+ * @author madebydap
+ * @version 1.0
  */
 public class TimelinePanel extends JPanel {
+    
+    /** Referensi ke frame utama */
     private final MainFrame mainFrame;
+    
+    /** Container untuk daftar moment */
     private JPanel momentsContainer;
+    
+    /** Scroll pane untuk moments */
     private JScrollPane scrollPane;
+    
+    /** Executor untuk auto-refresh */
     private ScheduledExecutorService refreshService;
+    
+    /** Jumlah moment saat ini (untuk deteksi perubahan) */
     private int momentCount = 0;
 
+    /** Interval auto-refresh dalam detik */
     private static final int REFRESH_INTERVAL_SECONDS = 15;
 
+    /**
+     * Konstruktor TimelinePanel.
+     * 
+     * @param mainFrame referensi ke frame utama
+     */
     public TimelinePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setBackground(PathColors.BACKGROUND);
@@ -32,6 +52,9 @@ public class TimelinePanel extends JPanel {
         initComponents();
     }
 
+    /**
+     * Menginisialisasi komponen UI.
+     */
     private void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
@@ -49,6 +72,11 @@ public class TimelinePanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Membuat header panel dengan logo Path.
+     * 
+     * @return JPanel header
+     */
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
@@ -66,6 +94,10 @@ public class TimelinePanel extends JPanel {
         return header;
     }
 
+    /**
+     * Memulai auto-refresh timeline.
+     * Thread berjalan sebagai daemon dan refresh setiap REFRESH_INTERVAL_SECONDS.
+     */
     public void startAutoRefresh() {
         if (refreshService != null && !refreshService.isShutdown()) {
             return;
@@ -93,6 +125,9 @@ public class TimelinePanel extends JPanel {
         System.out.println("[AutoRefresh] Started - checking every " + REFRESH_INTERVAL_SECONDS + "s");
     }
 
+    /**
+     * Menghentikan auto-refresh timeline.
+     */
     public void stopAutoRefresh() {
         if (refreshService != null && !refreshService.isShutdown()) {
             refreshService.shutdown();
@@ -100,11 +135,18 @@ public class TimelinePanel extends JPanel {
         }
     }
 
+    /**
+     * Merefresh timeline dan memulai auto-refresh.
+     */
     public void refresh() {
         refreshContent();
         startAutoRefresh();
     }
 
+    /**
+     * Merefresh konten timeline.
+     * Memuat ulang moment dari DataStore dan menampilkan di UI.
+     */
     private void refreshContent() {
         momentsContainer.removeAll();
 
