@@ -80,8 +80,8 @@ Path Social supports seven types of moments:
 │   └── flatlaf-3.4.jar                  # FlatLaf Look and Feel library
 ├── docs/                                # Generated Javadoc
 ├── runner.bat                           # Windows build and run script
+├── build-jar.bat                        # JAR packaging script
 └── generate-javadoc.bat                 # Javadoc generation script
-
 ```
 
 ## Requirements
@@ -103,6 +103,20 @@ This script will:
 1. Clean any previously compiled class files
 2. Compile all Java source files with FlatLaf dependency
 3. Launch the application if compilation succeeds
+
+### Building a JAR
+
+To create a self-contained JAR file:
+
+```batch
+build-jar.bat
+```
+
+This will generate `build/PathSocial.jar` which can be run with:
+
+```batch
+java -jar build/PathSocial.jar
+```
 
 ### Manual Compilation
 
