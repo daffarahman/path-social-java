@@ -43,12 +43,15 @@ public class ProfilePanel extends JPanel {
 
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(PathColors.PRIMARY);
-        header.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+        header.setBackground(PathColors.BACKGROUND_WHITE);
+        header.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, PathColors.DIVIDER),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
 
-        JLabel logoLabel = new JLabel("Path");
-        logoLabel.setFont(new Font("Georgia", Font.ITALIC | Font.BOLD, 24));
-        logoLabel.setForeground(Color.WHITE);
+        JLabel logoLabel = new JLabel("path");
+        logoLabel.setFont(new Font("Georgia", Font.ITALIC, 32));
+        logoLabel.setForeground(PathColors.PRIMARY);
         logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         header.add(logoLabel, BorderLayout.CENTER);
 
