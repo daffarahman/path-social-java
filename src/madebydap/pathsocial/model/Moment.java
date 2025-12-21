@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Represents a moment shared by a user on Path.
- * Supports optional image attachment for PHOTO moments.
+ * Supports optional image attachment and serialization.
  */
 public class Moment {
     private final String id;
@@ -14,8 +14,9 @@ public class Moment {
     private final MomentType type;
     private final String content;
     private final LocalDateTime timestamp;
-    private String imagePath; // For PHOTO moments
+    private String imagePath;
 
+    // Standard constructor for new moments
     public Moment(String userId, MomentType type, String content) {
         this.id = UUID.randomUUID().toString();
         this.userId = userId;
@@ -28,6 +29,16 @@ public class Moment {
     public Moment(String userId, MomentType type, String content, String imagePath) {
         this(userId, type, content);
         this.imagePath = imagePath;
+    }
+
+    // Constructor for loading from persistence
+    public Moment(String id, String userId, MomentType type, String content, String imagePath, LocalDateTime timestamp) {
+        this.id = id;
+        this.userId = userId;
+        this.type = type;
+        this.content = content;
+        this.imagePath = imagePath;
+        this.timestamp = timestamp;
     }
 
     public String getId() {

@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Main application frame with bottom navigation and FAB.
+ * Main application frame with bottom navigation, FAB, and real-time sync.
  */
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
@@ -21,6 +21,8 @@ public class MainFrame extends JFrame {
     private TimelinePanel timelinePanel;
     private ProfilePanel profilePanel;
     private FriendsPanel friendsPanel;
+    
+    private String currentPanelName = "login";
 
     public MainFrame() {
         setTitle("Path - Share Life");
@@ -30,17 +32,16 @@ public class MainFrame extends JFrame {
         setMinimumSize(new Dimension(360, 600));
 
         initComponents();
+        setupChangeListener();
     }
 
     private void initComponents() {
-        // Use layered pane for FAB overlay
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
 
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(PathColors.BACKGROUND);
 
-        // Main content area
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
         mainPanel.setBackground(PathColors.BACKGROUND);
@@ -57,17 +58,14 @@ public class MainFrame extends JFrame {
 
         container.add(mainPanel, BorderLayout.CENTER);
 
-        // Bottom navigation bar
         bottomNav = new BottomNavBar();
         bottomNav.setOnNavigate(this::showPanel);
         bottomNav.setVisible(false);
         container.add(bottomNav, BorderLayout.SOUTH);
 
-        // Make container fill the layered pane
         container.setBounds(0, 0, 400, 700);
         layeredPane.add(container, JLayeredPane.DEFAULT_LAYER);
 
-        // FAB on top layer
         fab = new FloatingActionButton();
         fab.setOnMomentTypeSelected(type -> {
             AddMomentDialog dialog = new AddMomentDialog(this, type);
@@ -80,7 +78,6 @@ public class MainFrame extends JFrame {
         fab.setVisible(false);
         layeredPane.add(fab, JLayeredPane.PALETTE_LAYER);
 
-        // Handle resize
         addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
             public void componentResized(java.awt.event.ComponentEvent e) {
@@ -95,7 +92,32 @@ public class MainFrame extends JFrame {
         showPanel("login");
     }
 
+    /**
+     * Setup listener for real-time data sync.
+     */
+    private void setupChangeListener() {
+        DataStore.getInstance().addChangeListener(() -> {
+            System.out.println("[MainFrame] Data changed, refreshing current panel...");
+            refreshCurrentPanel();
+        });
+    }
+
+    private void refreshCurrentPanel() {
+        switch (currentPanelName) {
+            case "timeline":
+                timelinePanel.refresh();
+                break;
+            case "profile":
+                profilePanel.refresh();
+                break;
+            case "friends":
+                friendsPanel.refresh();
+                break;
+        }
+    }
+
     public void showPanel(String panelName) {
+        currentPanelName = panelName;
         cardLayout.show(mainPanel, panelName);
         
         boolean showNav = !panelName.equals("login");

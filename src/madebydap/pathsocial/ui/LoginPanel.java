@@ -202,7 +202,7 @@ public class LoginPanel extends JPanel {
                 return;
             }
 
-            User user = dataStore.registerUser(username, password, displayName);
+            User user = dataStore.register(username, password, displayName);
             if (user == null) {
                 showError("Username already exists");
                 return;
