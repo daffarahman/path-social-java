@@ -22,9 +22,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimelinePanel extends JPanel {
     
-    /** Referensi ke frame utama */
-    private final MainFrame mainFrame;
-    
     /** Container untuk daftar moment */
     private JPanel momentsContainer;
     
@@ -42,11 +39,8 @@ public class TimelinePanel extends JPanel {
 
     /**
      * Konstruktor TimelinePanel.
-     * 
-     * @param mainFrame referensi ke frame utama
      */
-    public TimelinePanel(MainFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    public TimelinePanel() {
         setBackground(PathColors.BACKGROUND);
         setLayout(new BorderLayout());
         initComponents();

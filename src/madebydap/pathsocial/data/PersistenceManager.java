@@ -20,9 +20,6 @@ import java.util.regex.*;
  */
 public class PersistenceManager {
     
-    /** Nama direktori data (tidak digunakan) */
-    private static final String DATA_DIR = "pathdata";
-    
     /** Nama file data JSON */
     private static final String DATA_FILE = "data.json";
     

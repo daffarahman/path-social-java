@@ -76,9 +76,9 @@ public class MainFrame extends JFrame {
         mainPanel.setBackground(PathColors.BACKGROUND);
 
         loginPanel = new LoginPanel(this);
-        timelinePanel = new TimelinePanel(this);
+        timelinePanel = new TimelinePanel();
         profilePanel = new ProfilePanel(this);
-        friendsPanel = new FriendsPanel(this);
+        friendsPanel = new FriendsPanel();
 
         mainPanel.add(loginPanel, "login");
         mainPanel.add(timelinePanel, "timeline");

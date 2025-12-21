@@ -18,9 +18,6 @@ import java.util.List;
  */
 public class FriendsPanel extends JPanel {
     
-    /** Referensi ke frame utama */
-    private final MainFrame mainFrame;
-    
     /** Container daftar teman */
     private JPanel friendsContainer;
     
@@ -32,11 +29,8 @@ public class FriendsPanel extends JPanel {
 
     /**
      * Konstruktor FriendsPanel.
-     * 
-     * @param mainFrame referensi ke frame utama
      */
-    public FriendsPanel(MainFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    public FriendsPanel() {
         setBackground(PathColors.BACKGROUND);
         setLayout(new BorderLayout());
         initComponents();
