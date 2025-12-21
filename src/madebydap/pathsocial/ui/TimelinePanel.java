@@ -121,8 +121,6 @@ public class TimelinePanel extends JPanel {
                 SwingUtilities.invokeLater(this::refreshContent);
             }
         }, REFRESH_INTERVAL_SECONDS, REFRESH_INTERVAL_SECONDS, TimeUnit.SECONDS);
-
-        System.out.println("[AutoRefresh] Started - checking every " + REFRESH_INTERVAL_SECONDS + "s");
     }
 
     /**
@@ -131,7 +129,6 @@ public class TimelinePanel extends JPanel {
     public void stopAutoRefresh() {
         if (refreshService != null && !refreshService.isShutdown()) {
             refreshService.shutdown();
-            System.out.println("[AutoRefresh] Stopped");
         }
     }
 

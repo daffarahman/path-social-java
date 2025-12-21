@@ -79,7 +79,6 @@ public class DataStore {
         currentUser = null;
         createSampleData();
         saveData();
-        System.out.println("[DataStore] Data reset complete");
     }
 
     /**
@@ -125,13 +124,10 @@ public class DataStore {
 
         fileWatcher.scheduleAtFixedRate(() -> {
             if (persistence.hasExternalChanges()) {
-                System.out.println("[FileWatcher] External changes detected, reloading...");
                 loadDataFromFile();
                 notifyChangeListeners();
             }
         }, SYNC_INTERVAL_MS, SYNC_INTERVAL_MS, TimeUnit.MILLISECONDS);
-
-        System.out.println("[FileWatcher] Started - checking every " + SYNC_INTERVAL_MS + "ms");
     }
 
     /**
@@ -140,7 +136,6 @@ public class DataStore {
     public void stopFileWatcher() {
         if (fileWatcher != null && !fileWatcher.isShutdown()) {
             fileWatcher.shutdown();
-            System.out.println("[FileWatcher] Stopped");
         }
     }
 

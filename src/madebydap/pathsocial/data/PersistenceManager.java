@@ -79,8 +79,6 @@ public class PersistenceManager {
             }
             
             Files.createDirectories(imagesPath);
-            
-            System.out.println("[Persistence] All data cleared!");
             return true;
         } catch (IOException e) {
             System.err.println("[Persistence] Failed to clear data: " + e.getMessage());
@@ -174,7 +172,6 @@ public class PersistenceManager {
         try {
             Files.writeString(dataPath, json.toString());
             lastModified = Files.getLastModifiedTime(dataPath).toMillis();
-            System.out.println("[Persistence] Saved " + users.size() + " users, " + moments.size() + " moments");
         } catch (IOException e) {
             System.err.println("[Persistence] Failed to save: " + e.getMessage());
         }
@@ -247,7 +244,6 @@ public class PersistenceManager {
         LoadResult result = new LoadResult();
         
         if (!Files.exists(dataPath)) {
-            System.out.println("[Persistence] No data file found, starting fresh");
             return result;
         }
         
@@ -257,8 +253,6 @@ public class PersistenceManager {
             
             result.users = parseUsers(json);
             result.moments = parseMoments(json);
-            
-            System.out.println("[Persistence] Loaded " + result.users.size() + " users, " + result.moments.size() + " moments");
         } catch (IOException e) {
             System.err.println("[Persistence] Failed to load: " + e.getMessage());
         }

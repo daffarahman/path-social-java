@@ -50,7 +50,7 @@ public class MainFrame extends JFrame {
      * Menginisialisasi komponen UI dan listener untuk sinkronisasi.
      */
     public MainFrame() {
-        setTitle("Path - Share Life");
+        setTitle("Path Social");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 700);
         setLocationRelativeTo(null);
@@ -127,7 +127,6 @@ public class MainFrame extends JFrame {
      */
     private void setupChangeListener() {
         DataStore.getInstance().addChangeListener(() -> {
-            System.out.println("[MainFrame] Data changed, refreshing current panel...");
             refreshCurrentPanel();
         });
     }
