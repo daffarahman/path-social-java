@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author madebydap
  * @version 1.0
  */
-public class TimelinePanel extends JPanel {
+public class TimelinePanel extends BasePanel {
     
     /** Container untuk daftar moment */
     private JPanel momentsContainer;
@@ -41,15 +41,14 @@ public class TimelinePanel extends JPanel {
      * Konstruktor TimelinePanel.
      */
     public TimelinePanel() {
-        setBackground(PathColors.BACKGROUND);
-        setLayout(new BorderLayout());
-        initComponents();
+        super();
     }
 
     /**
      * Menginisialisasi komponen UI.
      */
-    private void initComponents() {
+    @Override
+    protected void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
         momentsContainer = new JPanel();
@@ -71,7 +70,8 @@ public class TimelinePanel extends JPanel {
      * 
      * @return JPanel header
      */
-    private JPanel createHeader() {
+    @Override
+    protected JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -129,6 +129,7 @@ public class TimelinePanel extends JPanel {
     /**
      * Merefresh timeline dan memulai auto-refresh.
      */
+    @Override
     public void refresh() {
         refreshContent();
         startAutoRefresh();

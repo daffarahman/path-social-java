@@ -16,7 +16,7 @@ import java.util.List;
  * @author madebydap
  * @version 1.0
  */
-public class FriendsPanel extends JPanel {
+public class FriendsPanel extends BasePanel {
     
     /** Container daftar teman */
     private JPanel friendsContainer;
@@ -31,15 +31,14 @@ public class FriendsPanel extends JPanel {
      * Konstruktor FriendsPanel.
      */
     public FriendsPanel() {
-        setBackground(PathColors.BACKGROUND);
-        setLayout(new BorderLayout());
-        initComponents();
+        super();
     }
 
     /**
      * Menginisialisasi komponen UI.
      */
-    private void initComponents() {
+    @Override
+    protected void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
         JPanel content = new JPanel();
@@ -75,7 +74,8 @@ public class FriendsPanel extends JPanel {
      * 
      * @return JPanel header
      */
-    private JPanel createHeader() {
+    @Override
+    protected JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -307,6 +307,7 @@ public class FriendsPanel extends JPanel {
     /**
      * Merefresh daftar teman.
      */
+    @Override
     public void refresh() {
         removeAll();
         initComponents();

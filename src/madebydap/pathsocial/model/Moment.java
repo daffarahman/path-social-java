@@ -1,6 +1,7 @@
 package madebydap.pathsocial.model;
 
 import java.time.LocalDateTime;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -170,7 +171,7 @@ public class Moment {
      */
     public String getRelativeTime() {
         LocalDateTime now = LocalDateTime.now();
-        long minutes = java.time.Duration.between(timestamp, now).toMinutes();
+        long minutes = Duration.between(timestamp, now).toMinutes();
         
         if (minutes < 1) return "Just now";
         if (minutes < 60) return minutes + "m ago";

@@ -18,7 +18,7 @@ import java.util.List;
  * @author madebydap
  * @version 1.0
  */
-public class ProfilePanel extends JPanel {
+public class ProfilePanel extends BasePanel {
     
     /** Referensi ke frame utama */
     private final MainFrame mainFrame;
@@ -33,15 +33,13 @@ public class ProfilePanel extends JPanel {
      */
     public ProfilePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setBackground(PathColors.BACKGROUND);
-        setLayout(new BorderLayout());
-        initComponents();
     }
 
     /**
      * Menginisialisasi komponen UI.
      */
-    private void initComponents() {
+    @Override
+    protected void initComponents() {
         add(createHeader(), BorderLayout.NORTH);
 
         contentPanel = new JPanel();
@@ -62,7 +60,8 @@ public class ProfilePanel extends JPanel {
      * 
      * @return JPanel header
      */
-    private JPanel createHeader() {
+    @Override
+    protected JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PathColors.BACKGROUND_WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -83,6 +82,7 @@ public class ProfilePanel extends JPanel {
      * Merefresh konten profil.
      * Memuat ulang data pengguna dan moment dari DataStore.
      */
+    @Override
     public void refresh() {
         contentPanel.removeAll();
 
